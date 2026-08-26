@@ -4,7 +4,7 @@ use iced::{
 };
 use iced_aw::{Menu, MenuBar, menu::Item, menu_items};
 
-use crate::{State, file::FileEvents, update::Events};
+use crate::{State, file_update::FileEvents, update::Events};
 
 impl State {
     pub fn top_bar(&self) -> Element<'_, Events> {
