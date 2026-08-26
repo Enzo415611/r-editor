@@ -2,15 +2,27 @@ use iced::{
     Element, Length, Renderer, Theme,
     widget::{button, text},
 };
-use iced_aw::{Menu, MenuBar, menu::Item, menu_items};
+use iced_aw::{
+    Menu, MenuBar,
+    menu::{self, Item},
+    menu_items,
+};
 
 use crate::{State, file_update::FileEvents, update::Events};
 
 impl State {
     pub fn top_bar(&self) -> Element<'_, Events> {
-        let menu_bar = MenuBar::new(menu_items!((
-            button("File").on_press(Events::Test),
-            file_menu()
+        let menu_bar = MenuBar::new(menu_items!(Item::with_menu(
+            button("=").on_press(Events::Test),
+            Menu::new(vec![
+                Item::new(button("Config").width(Length::Fill).on_press(Events::Test)),
+                Item::with_menu(
+                    button("File").width(Length::Fill).on_press(Events::Test),
+                    file_menu()
+                )
+            ])
+            .padding(0)
+            .width(150)
         )));
         menu_bar.height(30).into()
     }

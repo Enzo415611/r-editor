@@ -50,10 +50,7 @@ impl State {
 
     pub fn editor_update(&mut self, e: iced_code_editor::Message) -> Task<Events> {
         match e {
-            _ => {
-                let task = self.editor.update(&e);
-                task.map(Events::Editor)
-            }
+            _ => self.editor.update(&e).map(Events::Editor),
         }
     }
 }

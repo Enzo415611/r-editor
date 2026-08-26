@@ -1,6 +1,6 @@
 use std::path::PathBuf;
 
-use iced::{Subscription, keyboard, widget::pane_grid};
+use iced::{Subscription, Theme, keyboard, widget::pane_grid};
 use iced_code_editor::CodeEditor;
 use iced_swdir_tree::DirectoryTree;
 
@@ -14,11 +14,13 @@ mod update;
 
 fn main() -> iced::Result {
     iced::application(State::new, State::update, State::view)
+        .theme(|state: &State| state.theme())
         .subscription(|state| subscription(state))
         .run()
 }
 
 pub struct State {
+    current_theme: Theme,
     dir_state: DirState,
     editor_grid: pane_grid::State<Pane>,
     editor_pane: pane_grid::Pane,
@@ -53,17 +55,25 @@ impl State {
             .unwrap();
         let tree = DirectoryTree::new(PathBuf::new())
             .with_filter(iced_swdir_tree::DirectoryFilter::FilesAndFolders);
+
+        let mut editor = CodeEditor::new("", "rs").with_wrap_enabled(false);
+        editor.set_theme(iced_code_editor::from_iced_theme(&Theme::CatppuccinMocha));
         Self {
+            current_theme: Theme::CatppuccinMocha,
             dir_state: DirState::new(),
             editor_grid: state,
             file_tree_pane: file_tree_pane,
             file_tree_resize: (split, 0.),
             editor_pane: editor_pane,
             file_tree_is_open: true,
-            editor: CodeEditor::new("", "rs"),
+            editor,
             tree,
             binds: Binds::new(),
         }
+    }
+
+    fn theme(&self) -> Theme {
+        self.current_theme.to_owned()
     }
 }
 

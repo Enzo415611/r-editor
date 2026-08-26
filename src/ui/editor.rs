@@ -1,9 +1,14 @@
-use iced::{Element, widget::container};
+use iced::{
+    Element,
+    widget::{column, container},
+};
 
 use crate::{State, update::Events};
 
 impl State {
     pub fn editor_view(&self) -> Element<'_, Events> {
-        container(self.editor.view().map(Events::Editor)).into()
+        container(self.editor.view().map(Events::Editor))
+            .padding(2)
+            .into()
     }
 }

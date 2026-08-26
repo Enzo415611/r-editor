@@ -4,6 +4,12 @@ use crate::{State, update::Events};
 
 impl State {
     pub fn file_tree_view(&self) -> Element<'_, Events> {
-        container(self.tree.view(Events::Tree)).into()
+        let tree_view = if self.dir_state.current_dir_path.is_none() {
+            container("Select Project").into()
+        } else {
+            container(self.tree.view(Events::Tree)).into()
+        };
+
+        tree_view
     }
 }
