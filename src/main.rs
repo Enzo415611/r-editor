@@ -1,14 +1,9 @@
-use std::path::PathBuf;
+use iced::{Subscription, Theme, keyboard};
 
-use iced::{Subscription, Theme, keyboard, widget::pane_grid};
-use iced_code_editor::CodeEditor;
-use iced_swdir_tree::DirectoryTree;
+use crate::{file::DirState, ui::view::UiState, update::Events};
 
-use crate::{file::DirState, ui::view::Pane, update::Events};
-
+mod events;
 mod file;
-mod file_update;
-mod key_event;
 mod ui;
 mod update;
 
@@ -20,20 +15,26 @@ fn main() -> iced::Result {
 }
 
 pub struct State {
-    current_theme: Theme,
+    ui_state: UiState,
     dir_state: DirState,
-    editor_grid: pane_grid::State<Pane>,
-    editor_pane: pane_grid::Pane,
-    file_tree_pane: pane_grid::Pane,
-    file_tree_resize: (pane_grid::Split, f32),
-    file_tree_is_open: bool,
-    editor: CodeEditor,
-    tree: DirectoryTree,
+    config_state: ConfigState,
     binds: Binds,
 }
 
 pub struct Binds {
     open_file_tree_bind: (keyboard::Modifiers, keyboard::Key),
+}
+
+pub struct ConfigState {
+    auto_save_is_active: bool,
+}
+
+impl ConfigState {
+    fn new() -> Self {
+        Self {
+            auto_save_is_active: false,
+        }
+    }
 }
 
 impl Binds {
@@ -49,31 +50,16 @@ impl Binds {
 
 impl State {
     fn new() -> Self {
-        let (mut state, file_tree_pane) = pane_grid::State::new(Pane::FileTree);
-        let (editor_pane, split) = state
-            .split(pane_grid::Axis::Vertical, file_tree_pane, Pane::Editor)
-            .unwrap();
-        let tree = DirectoryTree::new(PathBuf::new())
-            .with_filter(iced_swdir_tree::DirectoryFilter::FilesAndFolders);
-
-        let mut editor = CodeEditor::new("", "rs").with_wrap_enabled(false);
-        editor.set_theme(iced_code_editor::from_iced_theme(&Theme::CatppuccinMocha));
         Self {
-            current_theme: Theme::CatppuccinMocha,
             dir_state: DirState::new(),
-            editor_grid: state,
-            file_tree_pane: file_tree_pane,
-            file_tree_resize: (split, 0.),
-            editor_pane: editor_pane,
-            file_tree_is_open: true,
-            editor,
-            tree,
+            ui_state: UiState::new(),
+            config_state: ConfigState::new(),
             binds: Binds::new(),
         }
     }
 
     fn theme(&self) -> Theme {
-        self.current_theme.to_owned()
+        self.ui_state.current_theme.to_owned()
     }
 }
 

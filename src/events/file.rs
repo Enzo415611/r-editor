@@ -16,6 +16,7 @@ pub enum FileEvents {
     OpenFolder,
     OpenFolderLoaded(Option<PathBuf>),
     Save,
+    AutoSave,
 }
 
 impl State {
@@ -28,7 +29,7 @@ impl State {
                 self.dir_state.current_file_path = path;
                 if let Some(path) = &self.dir_state.current_file_path {
                     if let Some(content) = read_file(path) {
-                        let task = self.editor.reset(&content);
+                        let task = self.ui_state.editor.reset(&content);
                         return task.map(|event| Events::Editor(event));
                     }
                 }
@@ -39,11 +40,18 @@ impl State {
             }),
             FileEvents::OpenFolderLoaded(path) => {
                 self.dir_state.current_dir_path = path;
-                self.tree =
+                self.ui_state.tree =
                     DirectoryTree::new(self.dir_state.current_dir_path.clone().unwrap_or_default());
                 Task::none()
             }
-            FileEvents::Save => Task::none(),
+            FileEvents::Save => {
+                self.save_file();
+                Task::none()
+            }
+            FileEvents::AutoSave => {
+                self.config_state.auto_save_is_active = !self.config_state.auto_save_is_active;
+                Task::none()
+            }
         }
     }
 }

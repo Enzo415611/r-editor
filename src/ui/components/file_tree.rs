@@ -7,7 +7,7 @@ impl State {
         let tree_view = if self.dir_state.current_dir_path.is_none() {
             container("Select Project").into()
         } else {
-            container(self.tree.view(Events::Tree)).into()
+            container(self.ui_state.tree.view(Events::Tree)).into()
         };
 
         tree_view

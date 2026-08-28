@@ -1,7 +1,7 @@
 use iced::{Task, keyboard, widget::pane_grid};
 use iced_swdir_tree::DirectoryTreeEvent;
 
-use crate::{State, file::read_file, file_update::FileEvents};
+use crate::{State, events::file::FileEvents, file::read_file};
 
 #[derive(Debug, Clone)]
 pub enum Events {
@@ -18,8 +18,8 @@ impl State {
         match events {
             Events::Test => Task::none(),
             Events::ResizeEvent(e) => {
-                self.file_tree_resize = (e.split, e.ratio);
-                self.editor_grid.resize(e.split, e.ratio);
+                self.ui_state.file_tree_resize = (e.split, e.ratio);
+                self.ui_state.editor_grid.resize(e.split, e.ratio);
                 Task::none()
             }
             Events::File(e) => self.file_update(e),
@@ -37,20 +37,14 @@ impl State {
 
                     if let Some(path) = &self.dir_state.current_file_path {
                         if let Some(content) = read_file(path) {
-                            let task = self.editor.reset(&content);
+                            let task = self.ui_state.editor.reset(&content);
                             return task.map(|event| Events::Editor(event));
                         }
                     }
                 }
                 Task::none()
             }
-            _ => self.tree.update(e).map(Events::Tree),
-        }
-    }
-
-    pub fn editor_update(&mut self, e: iced_code_editor::Message) -> Task<Events> {
-        match e {
-            _ => self.editor.update(&e).map(Events::Editor),
+            _ => self.ui_state.tree.update(e).map(Events::Tree),
         }
     }
 }
