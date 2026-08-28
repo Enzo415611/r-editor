@@ -4,9 +4,9 @@ use iced::Task;
 use iced_swdir_tree::DirectoryTree;
 
 use crate::{
-    State,
+    GlobalState,
     file::{pick_file, pick_folder, read_file},
-    update::Events,
+    update::GlobalMessagens,
 };
 
 #[derive(Debug, Clone)]
@@ -19,24 +19,26 @@ pub enum FileEvents {
     AutoSave,
 }
 
-impl State {
-    pub fn file_update(&mut self, events: FileEvents) -> Task<Events> {
+impl GlobalState {
+    pub fn file_update(&mut self, events: FileEvents) -> Task<GlobalMessagens> {
         match events {
-            FileEvents::OpenFile => {
-                Task::perform(pick_file(), |r| Events::File(FileEvents::OpenFileLoaded(r)))
-            }
+            FileEvents::OpenFile => Task::perform(pick_file(), |r| {
+                GlobalMessagens::File(FileEvents::OpenFileLoaded(r))
+            }),
             FileEvents::OpenFileLoaded(path) => {
                 self.dir_state.current_file_path = path;
                 if let Some(path) = &self.dir_state.current_file_path {
                     if let Some(content) = read_file(path) {
                         let task = self.ui_state.editor.reset(&content);
-                        return task.map(|event| Events::Editor(event));
+                        return task.map(|event| {
+                            GlobalMessagens::UiEvents(super::ui::UiMessages::Editor(event))
+                        });
                     }
                 }
                 Task::none()
             }
             FileEvents::OpenFolder => Task::perform(pick_folder(), |r| {
-                Events::File(FileEvents::OpenFolderLoaded(r))
+                GlobalMessagens::File(FileEvents::OpenFolderLoaded(r))
             }),
             FileEvents::OpenFolderLoaded(path) => {
                 self.dir_state.current_dir_path = path;

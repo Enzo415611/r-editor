@@ -1,9 +1,9 @@
 use iced::{Task, keyboard, widget::pane_grid};
 
-use crate::{State, update::Events};
+use crate::{GlobalState, update::GlobalMessagens};
 
-impl State {
-    pub fn key_event(&mut self, e: keyboard::Event) -> Task<Events> {
+impl GlobalState {
+    pub fn key_update(&mut self, e: keyboard::Event) -> Task<GlobalMessagens> {
         match e {
             keyboard::Event::KeyPressed {
                 key,
@@ -14,8 +14,8 @@ impl State {
                 text,
                 repeat,
             } => {
-                if modifiers == self.binds.open_file_tree_bind.0
-                    && key == self.binds.open_file_tree_bind.1
+                if modifiers == self.binds_state.open_file_tree_bind.0
+                    && key == self.binds_state.open_file_tree_bind.1
                 {
                     self.open_tree_view();
                 }

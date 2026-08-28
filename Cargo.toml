@@ -4,8 +4,11 @@ version = "0.1.0"
 edition = "2024"
 
 [dependencies]
+anyhow = "1.0.104"
+confy = "2.0.0"
 iced = { version = "0.14.0", features = ["tokio"] }
 iced-code-editor = "0.4.2"
-iced-swdir-tree = "0.9.3"
+iced-swdir-tree = { version = "0.9.3", features = [ "icons" ] }
 iced_aw = { version = "0.14.1", features = ["menu"] }
 rfd = "0.17.2"
+serde = { version = "1.0.229", features = ["derive"] }

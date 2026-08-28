@@ -1,23 +1,39 @@
 use iced::Task;
 
-use crate::{State, update::Events};
+use crate::{GlobalState, events::ui::UiMessages, update::GlobalMessagens};
+use iced_code_editor::Message as EditorMessage;
 
-impl State {
-    pub fn editor_update(&mut self, e: iced_code_editor::Message) -> Task<Events> {
+impl GlobalState {
+    pub fn editor_update(&mut self, e: iced_code_editor::Message) -> Task<GlobalMessagens> {
         match e {
-            iced_code_editor::Message::CharacterInput(_) => {
-                let r = self.ui_state.editor.update(&e).map(Events::Editor);
+            EditorMessage::CharacterInput(_)
+            | EditorMessage::Delete
+            | EditorMessage::Tab
+            | EditorMessage::Backspace
+            | EditorMessage::Redo
+            | EditorMessage::Undo
+            | EditorMessage::Cut
+            | EditorMessage::Paste(_) => {
+                let r = self
+                    .ui_state
+                    .editor
+                    .update(&e)
+                    .map(|e| GlobalMessagens::UiEvents(UiMessages::Editor(e)));
                 if self.config_state.auto_save_is_active {
                     self.save_file();
                 }
                 Task::batch(vec![r])
             }
-            // ctrl + s pressed ccccvzxl
+            // ctrl + s pressed
             iced_code_editor::Message::WriteRequested => {
                 self.save_file();
                 Task::none()
             }
-            _ => self.ui_state.editor.update(&e).map(Events::Editor),
+            _ => self
+                .ui_state
+                .editor
+                .update(&e)
+                .map(|e| GlobalMessagens::UiEvents(UiMessages::Editor(e))),
         }
     }
 }

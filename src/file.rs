@@ -1,24 +1,8 @@
 use std::{fs, path::PathBuf};
 
-use iced::Task;
+use crate::GlobalState;
 
-use crate::{State, update::Events};
-
-pub struct DirState {
-    pub current_dir_path: Option<PathBuf>,
-    pub current_file_path: Option<PathBuf>,
-}
-
-impl DirState {
-    pub fn new() -> Self {
-        Self {
-            current_dir_path: None,
-            current_file_path: None,
-        }
-    }
-}
-
-impl State {
+impl GlobalState {
     pub fn save_file(&mut self) {
         if let Some(path) = &self.dir_state.current_file_path {
             if let Err(err) = fs::write(path, self.ui_state.editor.content()) {

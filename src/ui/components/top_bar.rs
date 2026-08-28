@@ -1,52 +1,64 @@
 use iced::{
-    Element, Length, Renderer, Theme,
-    widget::{button, text},
+    Element, Length, Padding, Renderer, Theme,
+    widget::{self, button, text::Alignment},
 };
 use iced_aw::{Menu, MenuBar, menu::Item, menu_items};
 
-use crate::{State, events::file::FileEvents, update::Events};
+use crate::{GlobalState, events::file::FileEvents, ui::view::Page, update::GlobalMessagens};
 
-impl State {
-    pub fn top_bar(&self) -> Element<'_, Events> {
+impl GlobalState {
+    pub fn top_bar(&self) -> Element<'_, GlobalMessagens> {
         let menu_bar = MenuBar::new(menu_items!(Item::with_menu(
-            button("=").on_press(Events::Test),
+            button(widget::text("=").align_x(Alignment::Center))
+                .padding(0)
+                .width(20)
+                .on_press(GlobalMessagens::Test),
             Menu::new(vec![
-                Item::new(button("Config").width(Length::Fill).on_press(Events::Test)),
+                Item::new(button("Config").width(Length::Fill).on_press(
+                    GlobalMessagens::UiEvents(crate::events::ui::UiMessages::SwapPage(
+                        Page::ConfigPage
+                    ))
+                )),
                 Item::with_menu(
-                    button("File").width(Length::Fill).on_press(Events::Test),
+                    button("File")
+                        .width(Length::Fill)
+                        .on_press(GlobalMessagens::Test),
                     self.file_menu()
                 )
             ])
             .padding(0)
             .width(150)
         )));
-        menu_bar.height(30).into()
+        menu_bar
+            .padding(Padding::default().horizontal(5))
+            .height(20)
+            .into()
     }
 
-    fn file_menu(&self) -> Menu<'static, Events, Theme, Renderer> {
+    fn file_menu(&self) -> Menu<'static, GlobalMessagens, Theme, Renderer> {
         let file_menu = Menu::new(vec![
             Item::new(
-                button(text("Open File"))
+                button(widget::text("Open File"))
                     .width(Length::Fill)
-                    .on_press(Events::File(FileEvents::OpenFile)),
+                    .on_press(GlobalMessagens::File(FileEvents::OpenFile)),
             ),
             Item::new(
-                button(text("Open Folder"))
+                button(widget::text("Open Folder"))
                     .width(Length::Fill)
-                    .on_press(Events::File(FileEvents::OpenFolder)),
+                    .on_press(GlobalMessagens::File(FileEvents::OpenFolder)),
             ),
             Item::new(
-                button(text("Save"))
+                button(widget::text("Save"))
                     .width(Length::Fill)
-                    .on_press(Events::File(FileEvents::Save)),
+                    .on_press(GlobalMessagens::File(FileEvents::Save)),
             ),
             Item::new(
-                button(text(format!(
+                button(widget::text(format!(
                     "Auto Save: {}",
                     self.config_state.auto_save_is_active
                 )))
                 .width(Length::Fill)
-                .on_press(Events::File(FileEvents::AutoSave)),
+                .on_press(GlobalMessagens::File(FileEvents::AutoSave)),
             ),
         ])
         .padding(0)
