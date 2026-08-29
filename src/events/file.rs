@@ -41,7 +41,15 @@ impl GlobalState {
                 GlobalMessagens::File(FileEvents::OpenFolderLoaded(r))
             }),
             FileEvents::OpenFolderLoaded(path) => {
+                if let Some(path) = &path {
+                    self.settings.dir_path = path.to_path_buf();
+                    let new_setting = self.settings.clone();
+                    if let Err(err) = self.save_settings(new_setting) {
+                        eprintln!("{}", err)
+                    }
+                }
                 self.dir_state.current_dir_path = path;
+
                 self.ui_state.tree =
                     DirectoryTree::new(self.dir_state.current_dir_path.clone().unwrap_or_default());
                 Task::none()

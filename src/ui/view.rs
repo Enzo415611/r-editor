@@ -21,11 +21,13 @@ impl GlobalState {
     pub fn view(&self) -> Element<'_, GlobalMessagens> {
         let editor_grid = pane_grid(&self.ui_state.editor_grid, |_, state, _| match state {
             Pane::FileTree => container(self.file_tree_view()).into(),
-            Pane::Editor => self.editor_view().into(),
+            Pane::Editor => column![self.tab_view(), self.editor_view()].into(),
         })
         .on_resize(10, |e| GlobalMessagens::UiEvents(ResizeEvent(e)));
+        let editor_page = column![self.top_bar(), editor_grid];
+
         match self.ui_state.current_page {
-            Page::EditorPage => container(column![self.top_bar(), editor_grid,]).into(),
+            Page::EditorPage => container(editor_page).into(),
             Page::ConfigPage => self.config_page_view(),
         }
     }

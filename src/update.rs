@@ -4,7 +4,7 @@ use iced_swdir_tree::DirectoryTreeEvent;
 use crate::{
     events::{file::FileEvents, ui::UiMessages},
     file::read_file,
-    state::GlobalState,
+    state::{GlobalState, Tab},
     ui::config_page::ConfigSelected,
 };
 
@@ -22,25 +22,7 @@ impl GlobalState {
     pub fn update(&mut self, events: GlobalMessagens) -> Task<GlobalMessagens> {
         match events {
             GlobalMessagens::InitConfig => {
-                if let Ok(s) = self.load_settings() {
-                    self.ui_state
-                        .editor
-                        .set_theme(iced_code_editor::from_iced_theme(
-                            &self.settings.current_theme.clone().into(),
-                        ));
-                    self.ui_state.current_theme = Some(self.settings.current_theme.clone().into());
-                    self.ui_state.editor.set_wrap_enabled(self.settings.wrap);
-                    self.ui_state
-                        .editor
-                        .set_font_size(self.settings.font_size, true);
-                    self.ui_state
-                        .editor
-                        .set_line_height(self.settings.line_height);
-                    self.ui_state
-                        .editor
-                        .set_line_numbers_enabled(self.settings.line_numbers);
-                    self.ui_state.editor.set_vim_enabled(self.settings.vim_mode);
-                }
+                _ = self.load_settings();
                 Task::none()
             }
             GlobalMessagens::Test => Task::none(),
@@ -55,7 +37,15 @@ impl GlobalState {
         match e {
             DirectoryTreeEvent::Selected(path, is_dir, _) => {
                 if !is_dir {
+                    // if false is file
                     self.dir_state.current_file_path = Some(path.to_path_buf());
+
+                    let name = path.file_name().unwrap_or_default().display().to_string();
+
+                    self.ui_state.tabs.insert(Tab {
+                        tab_name: name,
+                        path: path,
+                    });
 
                     if let Some(path) = &self.dir_state.current_file_path {
                         if let Some(content) = read_file(path) {

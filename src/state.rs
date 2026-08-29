@@ -1,4 +1,4 @@
-use std::path::PathBuf;
+use std::{collections::HashSet, path::PathBuf};
 
 use iced::{Task, Theme, keyboard, widget::pane_grid};
 use iced_code_editor::CodeEditor;
@@ -18,6 +18,7 @@ pub struct Settings {
     pub wrap: bool,
     pub line_numbers: bool,
     pub line_height: f32,
+    pub dir_path: PathBuf,
 }
 
 impl Default for Settings {
@@ -25,10 +26,11 @@ impl Default for Settings {
         Self {
             current_theme: AppTheme::CatppuccinMocha,
             vim_mode: false,
-            font_size: 12.0,
+            font_size: 14.0,
             wrap: false,
             line_numbers: true,
             line_height: 20.0,
+            dir_path: PathBuf::new(),
         }
     }
 }
@@ -62,6 +64,11 @@ impl GlobalState {
         Theme::Dark
     }
 }
+#[derive(Debug, Clone, PartialEq, Eq, Hash)]
+pub struct Tab {
+    pub tab_name: String,
+    pub path: PathBuf,
+}
 
 pub struct UiState {
     pub current_page: Page,
@@ -73,6 +80,7 @@ pub struct UiState {
     pub file_tree_is_open: bool,
     pub editor: CodeEditor,
     pub tree: DirectoryTree,
+    pub tabs: HashSet<Tab>,
 }
 
 impl UiState {
@@ -96,6 +104,7 @@ impl UiState {
             file_tree_is_open: true,
             editor,
             tree,
+            tabs: HashSet::new(),
         }
     }
 }

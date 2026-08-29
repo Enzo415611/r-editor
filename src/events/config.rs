@@ -1,7 +1,7 @@
 use iced::{Task, Theme};
 
 use crate::{
-    state::{AppTheme, GlobalState, Settings},
+    state::{AppTheme, GlobalState},
     ui::config_page::ConfigSelected,
     update::GlobalMessagens,
 };
