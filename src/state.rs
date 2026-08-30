@@ -78,6 +78,9 @@ pub struct UiState {
     pub file_tree_pane: pane_grid::Pane,
     pub file_tree_resize: (pane_grid::Split, f32),
     pub file_tree_is_open: bool,
+    pub terminal_pane: pane_grid::Pane,
+    pub terminal_pane_is_open: bool,
+    pub terminal: iced_term::Terminal,
     pub editor: CodeEditor,
     pub tree: DirectoryTree,
     pub tabs: HashSet<Tab>,
@@ -86,14 +89,37 @@ pub struct UiState {
 impl UiState {
     pub fn new() -> Self {
         let (mut state, file_tree_pane) = pane_grid::State::new(Pane::FileTree);
+
         let (editor_pane, split) = state
             .split(pane_grid::Axis::Vertical, file_tree_pane, Pane::Editor)
             .unwrap();
+
+        let (terminal_pane, _) = state
+            .split(pane_grid::Axis::Horizontal, editor_pane, Pane::Terminal)
+            .unwrap();
+
+        state.close(terminal_pane);
+
         let tree = DirectoryTree::new(PathBuf::new())
             .with_filter(iced_swdir_tree::DirectoryFilter::FilesAndFolders);
 
         let mut editor = CodeEditor::new("", "rs").with_wrap_enabled(false);
         editor.set_theme(iced_code_editor::from_iced_theme(&Theme::CatppuccinMocha));
+
+        let system_shell = std::env::var("SHELL")
+            .expect("SHELL variable is not defined")
+            .to_string();
+        let term_settings = iced_term::settings::Settings {
+            backend: iced_term::settings::BackendSettings {
+                program: system_shell,
+                ..Default::default()
+            },
+            ..Default::default()
+        };
+
+        let terminal = iced_term::Terminal::new(0, term_settings)
+            .expect("failed to create the new terminal instance");
+
         Self {
             current_page: Page::EditorPage,
             current_theme: Some(Theme::CatppuccinMocha),
@@ -102,6 +128,9 @@ impl UiState {
             file_tree_resize: (split, 0.),
             editor_pane: editor_pane,
             file_tree_is_open: true,
+            terminal_pane_is_open: false,
+            terminal_pane: terminal_pane,
+            terminal: terminal,
             editor,
             tree,
             tabs: HashSet::new(),

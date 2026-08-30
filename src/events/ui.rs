@@ -16,6 +16,10 @@ pub enum UiMessages {
     Editor(iced_code_editor::Message),
     TabSelected(Tab),
     CloseTab(Tab),
+    OpenOrCloseTerm,
+    TerminalCommands(iced_term::Command),
+    TerminalEvents(iced_term::Event),
+    TerminalEnters,
 }
 
 impl GlobalState {
@@ -45,6 +49,24 @@ impl GlobalState {
             }
             UiMessages::CloseTab(tab) => {
                 self.ui_state.tabs.remove(&tab);
+                Task::none()
+            }
+            UiMessages::TerminalEvents(iced_term::Event::BackendCall(_, cmd)) => {
+                self.ui_state
+                    .terminal
+                    .handle(iced_term::Command::ProxyToBackend(cmd));
+                Task::none()
+            }
+            UiMessages::TerminalCommands(c) => {
+                self.ui_state.terminal.handle(c);
+                Task::none()
+            }
+            UiMessages::TerminalEnters => {
+                self.ui_state.editor.lose_focus();
+                Task::none()
+            }
+            UiMessages::OpenOrCloseTerm => {
+                self.open_terminal_pane();
                 Task::none()
             }
         }

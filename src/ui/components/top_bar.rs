@@ -1,5 +1,5 @@
 use iced::{
-    Element, Length, Padding, Renderer, Theme,
+    Element, Length, Renderer, Theme,
     widget::{self, button, text::Alignment},
 };
 use iced_aw::{Menu, MenuBar, menu::Item, menu_items};
@@ -24,15 +24,15 @@ impl GlobalState {
                         .width(Length::Fill)
                         .on_press(GlobalMessagens::Test),
                     self.file_menu()
-                )
+                ),
+                Item::new(button("Terminal").width(Length::Fill).on_press(
+                    GlobalMessagens::UiEvents(crate::events::ui::UiMessages::OpenOrCloseTerm)
+                ))
             ])
             .padding(0)
             .width(150)
         )));
-        menu_bar
-            .padding(Padding::default().horizontal(5))
-            .height(20)
-            .into()
+        menu_bar.height(20).into()
     }
 
     fn file_menu(&self) -> Menu<'static, GlobalMessagens, Theme, Renderer> {

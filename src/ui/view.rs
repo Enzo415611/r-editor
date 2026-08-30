@@ -1,9 +1,13 @@
 use iced::{
-    Element,
-    widget::{column, container, pane_grid},
+    Element, Length,
+    widget::{column, container, mouse_area, pane_grid},
 };
 
-use crate::{GlobalState, events::ui::UiMessages::ResizeEvent, update::GlobalMessagens};
+use crate::{
+    GlobalState,
+    events::ui::UiMessages::{self, ResizeEvent},
+    update::GlobalMessagens,
+};
 
 #[derive(Debug, Clone)]
 pub enum Page {
@@ -15,6 +19,7 @@ pub enum Page {
 pub enum Pane {
     Editor,
     FileTree,
+    Terminal,
 }
 
 impl GlobalState {
@@ -22,7 +27,11 @@ impl GlobalState {
         let editor_grid = pane_grid(&self.ui_state.editor_grid, |_, state, _| match state {
             Pane::FileTree => container(self.file_tree_view()).into(),
             Pane::Editor => column![self.tab_view(), self.editor_view()].into(),
+            Pane::Terminal => mouse_area(container(self.terminal_view()))
+                .on_enter(GlobalMessagens::UiEvents(UiMessages::TerminalEnters))
+                .into(),
         })
+        .width(Length::Fill)
         .on_resize(10, |e| GlobalMessagens::UiEvents(ResizeEvent(e)));
         let editor_page = column![self.top_bar(), editor_grid];
 

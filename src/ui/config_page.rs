@@ -1,6 +1,6 @@
 use iced::{
-    Alignment, Element, Length, Theme,
-    widget::{self, button, column, container, pick_list, row, text},
+    Element, Length, Theme,
+    widget::{button, column, container, pick_list, row, text},
 };
 
 use crate::{events::ui::UiMessages, state::GlobalState, ui::view::Page, update::GlobalMessagens};
