@@ -11,5 +11,7 @@ iced-code-editor = "0.4.2"
 iced-swdir-tree = { version = "0.9.3", features = [ "icons" ] }
 iced_aw = { version = "0.14.1", features = ["menu"] }
 iced_term = "0.8.0"
+indexmap = "2.14.1"
 rfd = "0.17.2"
 serde = { version = "1.0.229", features = ["derive"] }
+which = "8.0.6"

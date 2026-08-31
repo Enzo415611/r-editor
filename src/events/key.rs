@@ -29,7 +29,7 @@ impl GlobalState {
                     && key.eq(&keyboard::Key::Character("=".into()))
                 {
                     self.settings.font_size = self.settings.font_size + 1.0;
-                    _ = self.save_settings(self.settings.to_owned());
+                    _ = self.save_settings();
                     self.ui_state
                         .editor
                         .set_font_size(self.settings.font_size, true);
@@ -37,7 +37,7 @@ impl GlobalState {
 
                 if modifiers.control() && key.eq(&keyboard::Key::Character("-".into())) {
                     self.settings.font_size = self.settings.font_size - 1.0;
-                    _ = self.save_settings(self.settings.to_owned());
+                    _ = self.save_settings();
                     self.ui_state
                         .editor
                         .set_font_size(self.settings.font_size, true);

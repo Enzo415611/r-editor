@@ -1,8 +1,9 @@
-use std::{collections::HashSet, path::PathBuf};
+use std::{collections::HashMap, env, path::PathBuf};
 
 use iced::{Task, Theme, keyboard, widget::pane_grid};
 use iced_code_editor::CodeEditor;
 use iced_swdir_tree::DirectoryTree;
+use indexmap::IndexSet;
 use serde::{Deserialize, Serialize};
 
 use crate::{
@@ -83,7 +84,7 @@ pub struct UiState {
     pub terminal: iced_term::Terminal,
     pub editor: CodeEditor,
     pub tree: DirectoryTree,
-    pub tabs: HashSet<Tab>,
+    pub tabs: IndexSet<Tab>,
 }
 
 impl UiState {
@@ -106,12 +107,21 @@ impl UiState {
         let mut editor = CodeEditor::new("", "rs").with_wrap_enabled(false);
         editor.set_theme(iced_code_editor::from_iced_theme(&Theme::CatppuccinMocha));
 
-        let system_shell = std::env::var("SHELL")
-            .expect("SHELL variable is not defined")
-            .to_string();
+        let mut env = HashMap::new();
+        env.insert("TERM".to_string(), "xterm-256color".to_string());
+
+        if let Ok(path) = std::env::var("PATH") {
+            env.insert("PATH".to_string(), path);
+        }
+        if let Ok(home) = std::env::var("HOME") {
+            env.insert("HOME".to_string(), home);
+        }
+
+        let system_shell = get_system_shell();
         let term_settings = iced_term::settings::Settings {
             backend: iced_term::settings::BackendSettings {
                 program: system_shell,
+                env,
                 ..Default::default()
             },
             ..Default::default()
@@ -133,7 +143,7 @@ impl UiState {
             terminal: terminal,
             editor,
             tree,
-            tabs: HashSet::new(),
+            tabs: IndexSet::new(),
         }
     }
 }
@@ -231,5 +241,26 @@ impl From<AppTheme> for Theme {
             AppTheme::Oxocarbon => Theme::Oxocarbon,
             AppTheme::Ferra => Theme::Ferra,
         }
+    }
+}
+
+fn get_system_shell() -> String {
+    if let Ok(shell) = env::var("SHELL") {
+        if !shell.is_empty() {
+            return shell;
+        }
+    }
+
+    #[cfg(target_os = "windows")]
+    {
+        if which::which("pwsh").is_ok() {
+            return "powershell".to_string();
+        }
+        return env::var("COMSPEC").unwrap_or_ekse(|_| "cmd.exe".to_string());
+    }
+
+    #[cfg(not(windows))]
+    {
+        "/bin/sh".to_string()
     }
 }

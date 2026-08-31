@@ -35,9 +35,8 @@ impl GlobalState {
         Ok(())
     }
 
-    pub fn save_settings(&mut self, new_setting: Settings) -> anyhow::Result<()> {
-        self.settings = new_setting.clone();
-        confy::store::<Settings>("r-editor", "settings", new_setting)?;
+    pub fn save_settings(&mut self) -> anyhow::Result<()> {
+        confy::store::<Settings>("r-editor", "settings", self.settings.clone())?;
 
         Ok(())
     }

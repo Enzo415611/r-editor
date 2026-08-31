@@ -10,14 +10,13 @@ impl GlobalState {
     pub fn config_update(&mut self, e: ConfigSelected) -> Task<GlobalMessagens> {
         match e {
             ConfigSelected::Theme(t) => {
+                self.settings.current_theme = t.clone().into();
+                if let Err(err) = self.save_settings() {
+                    eprintln!("{}", err)
+                }
                 self.ui_state
                     .editor
                     .set_theme(iced_code_editor::from_iced_theme(&t));
-                self.settings.current_theme = t.clone().into();
-                let new_setting = self.settings.clone();
-                if let Err(err) = self.save_settings(new_setting) {
-                    eprintln!("{}", err)
-                }
                 self.ui_state.current_theme = Some(t);
 
                 Task::none()

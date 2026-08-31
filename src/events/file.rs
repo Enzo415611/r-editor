@@ -15,6 +15,7 @@ pub enum FileEvents {
     OpenFileLoaded(Option<PathBuf>),
     OpenFolder,
     OpenFolderLoaded(Option<PathBuf>),
+    CloseFolder,
     Save,
     AutoSave,
 }
@@ -43,8 +44,7 @@ impl GlobalState {
             FileEvents::OpenFolderLoaded(path) => {
                 if let Some(path) = &path {
                     self.settings.dir_path = path.to_path_buf();
-                    let new_setting = self.settings.clone();
-                    if let Err(err) = self.save_settings(new_setting) {
+                    if let Err(err) = self.save_settings() {
                         eprintln!("{}", err)
                     }
                 }
@@ -52,6 +52,22 @@ impl GlobalState {
 
                 self.ui_state.tree =
                     DirectoryTree::new(self.dir_state.current_dir_path.clone().unwrap_or_default());
+                Task::none()
+            }
+            FileEvents::CloseFolder => {
+                if self.dir_state.current_dir_path.is_some() {
+                    self.ui_state.tabs.clear();
+                    self.dir_state.current_dir_path = None;
+                    self.settings.dir_path = PathBuf::new();
+                    if let Err(err) = self.save_settings() {
+                        eprintln!("{}", err)
+                    }
+                    return self
+                        .ui_state
+                        .editor
+                        .reset("")
+                        .map(|e| GlobalMessagens::UiEvents(super::ui::UiMessages::Editor(e)));
+                }
                 Task::none()
             }
             FileEvents::Save => {
