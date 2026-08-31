@@ -31,9 +31,7 @@ impl GlobalState {
                 column![self.tab_view(), self.editor_view()].padding(1)
             ]
             .into(),
-            Pane::Terminal => mouse_area(container(self.terminal_view()))
-                .on_enter(GlobalMessagens::UiEvents(UiMessages::TerminalEnters))
-                .into(),
+            Pane::Terminal => self.terminal_view().into(),
         })
         .width(Length::Fill)
         .style(|t| {
@@ -44,6 +42,7 @@ impl GlobalState {
             s
         })
         .on_resize(10, |e| GlobalMessagens::UiEvents(ResizeEvent(e)));
+
         let editor_page =
             container(column![self.top_bar(), rule::horizontal(1), editor_grid].spacing(3))
                 .padding(2);

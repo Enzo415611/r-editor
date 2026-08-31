@@ -6,6 +6,7 @@ mod events;
 mod file;
 mod settings;
 mod state;
+mod term;
 mod ui;
 mod update;
 
@@ -23,11 +24,11 @@ fn main() -> iced::Result {
 impl GlobalState {
     fn subscription(&self) -> Subscription<GlobalMessagens> {
         let keys = keyboard::listen().map(|e| GlobalMessagens::KeyEvent(e));
-        let term = self
-            .ui_state
-            .terminal
-            .subscription()
-            .map(|e| GlobalMessagens::UiEvents(events::ui::UiMessages::TerminalEvents(e)));
+        let term = Subscription::batch(self.ui_state.terminals.iter().map(|t| {
+            t.1.subscription()
+                .map(|e| GlobalMessagens::UiEvents(events::ui::UiMessages::TerminalEvents(e)))
+        }));
+
         Subscription::batch([keys, term])
     }
 }

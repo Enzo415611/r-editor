@@ -1,8 +1,9 @@
-use std::{collections::HashMap, env, path::PathBuf};
+use std::{collections::HashMap, path::PathBuf};
 
 use iced::{Task, Theme, keyboard, widget::pane_grid};
 use iced_code_editor::CodeEditor;
 use iced_swdir_tree::DirectoryTree;
+use iced_term::Terminal;
 use indexmap::IndexSet;
 use serde::{Deserialize, Serialize};
 
@@ -81,7 +82,7 @@ pub struct UiState {
     pub file_tree_is_open: bool,
     pub terminal_pane: pane_grid::Pane,
     pub terminal_pane_is_open: bool,
-    pub terminal: iced_term::Terminal,
+    pub terminals: HashMap<u64, Terminal>,
     pub editor: CodeEditor,
     pub tree: DirectoryTree,
     pub tabs: IndexSet<Tab>,
@@ -107,29 +108,6 @@ impl UiState {
         let mut editor = CodeEditor::new("", "rs").with_wrap_enabled(false);
         editor.set_theme(iced_code_editor::from_iced_theme(&Theme::CatppuccinMocha));
 
-        let mut env = HashMap::new();
-        env.insert("TERM".to_string(), "xterm-256color".to_string());
-
-        if let Ok(path) = std::env::var("PATH") {
-            env.insert("PATH".to_string(), path);
-        }
-        if let Ok(home) = std::env::var("HOME") {
-            env.insert("HOME".to_string(), home);
-        }
-
-        let system_shell = get_system_shell();
-        let term_settings = iced_term::settings::Settings {
-            backend: iced_term::settings::BackendSettings {
-                program: system_shell,
-                env,
-                ..Default::default()
-            },
-            ..Default::default()
-        };
-
-        let terminal = iced_term::Terminal::new(0, term_settings)
-            .expect("failed to create the new terminal instance");
-
         Self {
             current_page: Page::EditorPage,
             current_theme: Some(Theme::CatppuccinMocha),
@@ -140,7 +118,7 @@ impl UiState {
             file_tree_is_open: true,
             terminal_pane_is_open: false,
             terminal_pane: terminal_pane,
-            terminal: terminal,
+            terminals: HashMap::new(),
             editor,
             tree,
             tabs: IndexSet::new(),
@@ -241,26 +219,5 @@ impl From<AppTheme> for Theme {
             AppTheme::Oxocarbon => Theme::Oxocarbon,
             AppTheme::Ferra => Theme::Ferra,
         }
-    }
-}
-
-fn get_system_shell() -> String {
-    if let Ok(shell) = env::var("SHELL") {
-        if !shell.is_empty() {
-            return shell;
-        }
-    }
-
-    #[cfg(target_os = "windows")]
-    {
-        if which::which("pwsh").is_ok() {
-            return "powershell".to_string();
-        }
-        return env::var("COMSPEC").unwrap_or_ekse(|_| "cmd.exe".to_string());
-    }
-
-    #[cfg(not(windows))]
-    {
-        "/bin/sh".to_string()
     }
 }

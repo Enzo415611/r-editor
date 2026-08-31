@@ -1,4 +1,11 @@
-use iced::{Task, widget::pane_grid};
+use iced::{
+    Task,
+    advanced::widget::{operate, operation::focusable::unfocus},
+    widget::{
+        operation::{focus, focus_next},
+        pane_grid,
+    },
+};
 use iced_swdir_tree::DirectoryTreeEvent;
 
 use crate::{
@@ -20,6 +27,7 @@ pub enum UiMessages {
     TerminalCommands(iced_term::Command),
     TerminalEvents(iced_term::Event),
     TerminalEnters,
+    TerminalExit,
 }
 
 impl GlobalState {
@@ -48,27 +56,32 @@ impl GlobalState {
                 Task::none()
             }
             UiMessages::CloseTab(tab) => {
-                self.ui_state.tabs.remove(&tab);
+                self.ui_state.tabs.shift_remove(&tab);
                 Task::none()
             }
             UiMessages::TerminalEvents(iced_term::Event::BackendCall(_, cmd)) => {
-                self.ui_state
-                    .terminal
-                    .handle(iced_term::Command::ProxyToBackend(cmd));
+                self.ui_state.terminals.iter_mut().map(move |t| {
+                    t.1.handle(iced_term::Command::ProxyToBackend(cmd.to_owned()))
+                });
+
                 Task::none()
             }
             UiMessages::TerminalCommands(c) => {
-                self.ui_state.terminal.handle(c);
+                self.ui_state
+                    .terminals
+                    .iter_mut()
+                    .map(|t| t.1.handle(c.to_owned()));
                 Task::none()
             }
             UiMessages::TerminalEnters => {
                 self.ui_state.editor.lose_focus();
-                Task::none()
+                focus_next()
             }
-            UiMessages::OpenOrCloseTerm => {
-                self.open_terminal_pane();
-                Task::none()
+            UiMessages::TerminalExit => {
+                self.ui_state.editor.request_focus();
+                operate(unfocus())
             }
+            UiMessages::OpenOrCloseTerm => self.open_terminal_pane(),
         }
     }
 }

@@ -1,4 +1,11 @@
-use iced::{Task, keyboard, widget::pane_grid};
+use iced::{
+    Task,
+    keyboard::{
+        self,
+        key::{Code::BracketLeft, Physical},
+    },
+    widget::{operation::focus_next, pane_grid},
+};
 
 use crate::{GlobalState, update::GlobalMessagens};
 
@@ -14,8 +21,9 @@ impl GlobalState {
                 text,
                 repeat,
             } => {
-                if modifiers.control() && key.eq(&keyboard::Key::Character("t".into())) {
-                    self.open_terminal_pane();
+                if modifiers.control() && physical_key.eq(&Physical::Code(BracketLeft)) {
+                    self.ui_state.editor.lose_focus();
+                    return self.open_terminal_pane();
                 }
 
                 if modifiers.eq(&self.binds_state.open_file_tree_bind.0)
@@ -79,11 +87,15 @@ impl GlobalState {
         }
     }
 
-    pub fn open_terminal_pane(&mut self) {
+    pub fn open_terminal_pane(&mut self) -> Task<GlobalMessagens> {
         if self.ui_state.terminal_pane_is_open {
             if let Some((_, pane)) = self.ui_state.editor_grid.close(self.ui_state.terminal_pane) {
                 self.ui_state.terminal_pane = pane;
                 self.ui_state.terminal_pane_is_open = false;
+                self.ui_state.editor.request_focus();
+                return Task::done(GlobalMessagens::UiEvents(super::ui::UiMessages::Editor(
+                    iced_code_editor::Message::CanvasFocusGained,
+                )));
             }
         } else {
             if let Some((terminal_pane, _)) = self.ui_state.editor_grid.split(
@@ -91,13 +103,27 @@ impl GlobalState {
                 self.ui_state.editor_pane,
                 crate::ui::view::Pane::Terminal,
             ) {
+                if let Some(path) = &self.dir_state.current_dir_path {
+                    self.ui_state.terminal = self.new_terminal(0);
+                    // self.ui_state
+                    //     .terminal
+                    //     .handle(iced_term::Command::ProxyToBackend(
+                    //         iced_term::BackendCommand::Write(
+                    //             format!("cd {} \n", path.display().to_string()).into(),
+                    //         ),
+                    //     ));
+                }
                 self.ui_state.terminal_pane = terminal_pane;
                 self.ui_state.terminal_pane_is_open = true;
                 self.ui_state.editor_grid.drop(
                     terminal_pane,
                     pane_grid::Target::Edge(pane_grid::Edge::Bottom),
                 );
+                self.ui_state.editor.reset_focus_lock();
+                return focus_next();
             }
         }
+
+        Task::none()
     }
 }

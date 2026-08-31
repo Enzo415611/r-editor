@@ -1419,9 +1419,9 @@ checksum = "95505c38b4572b2d910cecb0281560f54b440a19336cbbcb27bf6ce6adc6f5a8"
 
 [[package]]
 name = "hermit-abi"
-version = "0.5.2"
+version = "0.5.3"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "fc0fef456e4baa96da950455cd02c081ca953b141298e41db3fc7e36b1da849c"
+checksum = "e17592d60ebacc7d5e169f4663c5f84f9161cc90328abcfe8456f41e4dfcb284"
 
 [[package]]
 name = "hex"
@@ -1488,9 +1488,9 @@ dependencies = [
 
 [[package]]
 name = "iced-code-editor"
-version = "0.4.2"
+version = "0.5.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "56b073155823a9ba5df395cbb400ef68506144ba9fbfc608e67992cfb642fc42"
+checksum = "993b0d772eaa46ade07923b4c1a423b73010e419814fa31ded6bba223a7d2e7b"
 dependencies = [
  "iced",
  "iced_aw 0.13.1",
