@@ -103,16 +103,11 @@ impl GlobalState {
                 self.ui_state.editor_pane,
                 crate::ui::view::Pane::Terminal,
             ) {
-                if let Some(path) = &self.dir_state.current_dir_path {
-                    self.ui_state.terminal = self.new_terminal(0);
-                    // self.ui_state
-                    //     .terminal
-                    //     .handle(iced_term::Command::ProxyToBackend(
-                    //         iced_term::BackendCommand::Write(
-                    //             format!("cd {} \n", path.display().to_string()).into(),
-                    //         ),
-                    //     ));
+                if self.ui_state.terminals.is_empty() {
+                    let new_term = self.new_terminal(0);
+                    self.ui_state.terminals.insert(new_term.1.id, new_term);
                 }
+
                 self.ui_state.terminal_pane = terminal_pane;
                 self.ui_state.terminal_pane_is_open = true;
                 self.ui_state.editor_grid.drop(

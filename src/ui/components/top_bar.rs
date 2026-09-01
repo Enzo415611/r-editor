@@ -48,7 +48,7 @@ impl GlobalState {
             .spacing(2)
             .width(150)
         )));
-        menu_bar.height(20).into()
+        menu_bar.height(22).padding(1).into()
     }
 
     fn file_menu(&self) -> Menu<'static, GlobalMessagens, Theme, Renderer> {

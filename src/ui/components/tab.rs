@@ -1,31 +1,29 @@
 use iced::{
     Alignment, Element, Length, Padding,
-    widget::{button, mouse_area, row, scrollable, text},
+    widget::{button, container, mouse_area, row, scrollable, text},
 };
 
-use crate::{
-    events::ui::UiMessages, state::GlobalState, ui::style::style::button_style,
-    update::GlobalMessagens,
-};
+use crate::{events::ui::UiMessages, state::GlobalState, update::GlobalMessagens};
 
 impl GlobalState {
     pub fn tab_view(&self) -> Element<'static, GlobalMessagens> {
         let r = row![]
             .extend(self.ui_state.tabs.iter().map(|tab| {
-                mouse_area(
-                    button(
-                        text(format!("{}", tab.tab_name))
-                            .size(14)
-                            .align_x(Alignment::Center),
-                    )
-                    .style(|t, s| button_style(t, s))
+                button(
+                    row![
+                        button(text(format!("{}", tab.tab_name)).center().size(13)).on_press(
+                            GlobalMessagens::UiEvents(UiMessages::TabSelected(tab.clone()),)
+                        ),
+                        button(text("X").size(13).center())
+                            .on_press(GlobalMessagens::UiEvents(UiMessages::CloseTab(tab.clone())))
+                    ]
                     .height(Length::Fill)
-                    .padding(Padding::default().horizontal(2))
-                    .on_press(GlobalMessagens::UiEvents(
-                        UiMessages::TabSelected(tab.clone()),
-                    )),
+                    .width(Length::Fill)
+                    .padding(0)
+                    .spacing(1),
                 )
-                .on_right_press(GlobalMessagens::UiEvents(UiMessages::CloseTab(tab.clone())))
+                .padding(2)
+                .height(Length::Fill)
                 .into()
             }))
             .spacing(3)
@@ -37,4 +35,10 @@ impl GlobalState {
             .spacing(2)
             .into()
     }
+}
+
+fn tab_button() -> Element<'static, GlobalMessagens> {
+    button(row![button(text("zzz").size(14)), button(text("X").size(14))].spacing(1))
+        .padding(2)
+        .into()
 }

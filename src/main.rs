@@ -13,6 +13,7 @@ mod update;
 fn main() -> iced::Result {
     let app = iced::application(GlobalState::new, GlobalState::update, GlobalState::view)
         .title("R Editor")
+        .decorations(false)
         .transparent(true)
         .resizable(true)
         .font(iced_swdir_tree::LUCIDE_FONT_BYTES)
@@ -25,7 +26,8 @@ impl GlobalState {
     fn subscription(&self) -> Subscription<GlobalMessagens> {
         let keys = keyboard::listen().map(|e| GlobalMessagens::KeyEvent(e));
         let term = Subscription::batch(self.ui_state.terminals.iter().map(|t| {
-            t.1.subscription()
+            t.1.1
+                .subscription()
                 .map(|e| GlobalMessagens::UiEvents(events::ui::UiMessages::TerminalEvents(e)))
         }));
 

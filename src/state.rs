@@ -4,10 +4,11 @@ use iced::{Task, Theme, keyboard, widget::pane_grid};
 use iced_code_editor::CodeEditor;
 use iced_swdir_tree::DirectoryTree;
 use iced_term::Terminal;
-use indexmap::IndexSet;
+use indexmap::{IndexMap, IndexSet};
 use serde::{Deserialize, Serialize};
 
 use crate::{
+    term::TerminalInfo,
     ui::view::{Page, Pane},
     update::GlobalMessagens,
 };
@@ -82,7 +83,7 @@ pub struct UiState {
     pub file_tree_is_open: bool,
     pub terminal_pane: pane_grid::Pane,
     pub terminal_pane_is_open: bool,
-    pub terminals: HashMap<u64, Terminal>,
+    pub terminals: IndexMap<u64, (TerminalInfo, Terminal)>,
     pub editor: CodeEditor,
     pub tree: DirectoryTree,
     pub tabs: IndexSet<Tab>,
@@ -118,7 +119,7 @@ impl UiState {
             file_tree_is_open: true,
             terminal_pane_is_open: false,
             terminal_pane: terminal_pane,
-            terminals: HashMap::new(),
+            terminals: IndexMap::new(),
             editor,
             tree,
             tabs: IndexSet::new(),

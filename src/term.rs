@@ -4,21 +4,44 @@ use iced_term::Terminal;
 
 use crate::state::GlobalState;
 
-impl GlobalState {
-    pub fn new_terminal(&self, id: u64) -> Terminal {
-        let path = self.dir_state.current_dir_path.clone();
+#[derive(Debug, Clone, Hash, PartialEq, Eq)]
+pub struct TerminalInfo {
+    pub id: u64,
+    pub working_dir: Option<PathBuf>,
+    pub shell: String,
+}
 
+impl TerminalInfo {
+    pub fn new(id: u64, working_dir: Option<PathBuf>, shell: String) -> Self {
+        Self {
+            id,
+            working_dir,
+            shell,
+        }
+    }
+}
+
+impl GlobalState {
+    pub fn new_terminal(&self, id: u64) -> (TerminalInfo, Terminal) {
+        let path = self.dir_state.current_dir_path.clone();
+        let shell = get_system_shell();
         let term_settings = iced_term::settings::Settings {
             backend: iced_term::settings::BackendSettings {
-                program: get_system_shell(),
+                program: shell.clone(),
                 env: env_for_terminal(),
-                working_directory: path,
+                working_directory: path.clone(),
                 ..Default::default()
             },
             ..Default::default()
         };
-        iced_term::Terminal::new(id, term_settings)
-            .expect("failed to create the new terminal instance")
+
+        let term_key = TerminalInfo::new(id, path, shell);
+
+        (
+            term_key,
+            iced_term::Terminal::new(id, term_settings)
+                .expect("failed to create the new terminal instance"),
+        )
     }
 }
 

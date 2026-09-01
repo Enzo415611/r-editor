@@ -1,10 +1,7 @@
 use iced::{
     Task,
     advanced::widget::{operate, operation::focusable::unfocus},
-    widget::{
-        operation::{focus, focus_next},
-        pane_grid,
-    },
+    widget::{operation::focus_next, pane_grid},
 };
 use iced_swdir_tree::DirectoryTreeEvent;
 
@@ -59,18 +56,19 @@ impl GlobalState {
                 self.ui_state.tabs.shift_remove(&tab);
                 Task::none()
             }
-            UiMessages::TerminalEvents(iced_term::Event::BackendCall(_, cmd)) => {
-                self.ui_state.terminals.iter_mut().map(move |t| {
-                    t.1.handle(iced_term::Command::ProxyToBackend(cmd.to_owned()))
-                });
+            UiMessages::TerminalEvents(iced_term::Event::BackendCall(id, cmd)) => {
+                if let Some(t) = self.ui_state.terminals.get_mut(&id) {
+                    t.1.handle(iced_term::Command::ProxyToBackend(cmd));
+                }
 
                 Task::none()
             }
             UiMessages::TerminalCommands(c) => {
-                self.ui_state
+                _ = self
+                    .ui_state
                     .terminals
                     .iter_mut()
-                    .map(|t| t.1.handle(c.to_owned()));
+                    .map(|t| t.1.1.handle(c.to_owned()));
                 Task::none()
             }
             UiMessages::TerminalEnters => {

@@ -1,13 +1,9 @@
 use iced::{
     Element, Length,
-    widget::{column, container, mouse_area, pane_grid, row, rule},
+    widget::{column, container, pane_grid, row, rule},
 };
 
-use crate::{
-    GlobalState,
-    events::ui::UiMessages::{self, ResizeEvent},
-    update::GlobalMessagens,
-};
+use crate::{GlobalState, events::ui::UiMessages::ResizeEvent, update::GlobalMessagens};
 
 #[derive(Debug, Clone)]
 pub enum Page {
@@ -44,8 +40,7 @@ impl GlobalState {
         .on_resize(10, |e| GlobalMessagens::UiEvents(ResizeEvent(e)));
 
         let editor_page =
-            container(column![self.top_bar(), rule::horizontal(1), editor_grid].spacing(3))
-                .padding(2);
+            container(column![self.top_bar(), rule::horizontal(1), editor_grid]).padding(2);
 
         match self.ui_state.current_page {
             Page::EditorPage => editor_page.into(),

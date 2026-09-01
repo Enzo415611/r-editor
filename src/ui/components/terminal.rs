@@ -1,18 +1,24 @@
 use iced::{
     Element,
-    widget::{column, container, mouse_area, rule},
+    widget::{column, container, mouse_area, row, rule},
 };
+use iced_term::Terminal;
 
-use crate::{events::ui::UiMessages, state::GlobalState, update::GlobalMessagens};
+use crate::{
+    events::ui::UiMessages, state::GlobalState, term::TerminalInfo, update::GlobalMessagens,
+};
 
 impl GlobalState {
     pub fn terminal_view(&self) -> Element<'_, GlobalMessagens> {
-        mouse_area(container(column![
-            rule::horizontal(1),
-            iced_term::TerminalView::show(&self.ui_state.terminals.get(&u64::from(0)))
-                .map(|e| { GlobalMessagens::UiEvents(UiMessages::TerminalEvents(e)) }),
-        ]))
-        .on_enter(GlobalMessagens::UiEvents(UiMessages::TerminalEnters))
-        .into()
+        let terms: Vec<&(TerminalInfo, Terminal)> = self.ui_state.terminals.values().collect();
+
+        let term_list = row![].extend(terms.iter().map(|t| {
+            iced_term::TerminalView::show(&t.1)
+                .map(|e| GlobalMessagens::UiEvents(UiMessages::TerminalEvents(e)))
+        }));
+
+        mouse_area(container(column![rule::horizontal(1), term_list]))
+            .on_enter(GlobalMessagens::UiEvents(UiMessages::TerminalEnters))
+            .into()
     }
 }
