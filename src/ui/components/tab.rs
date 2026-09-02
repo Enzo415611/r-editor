@@ -1,6 +1,6 @@
 use iced::{
-    Alignment, Element, Length, Padding,
-    widget::{button, container, mouse_area, row, scrollable, text},
+    Element, Length,
+    widget::{button, row, scrollable, text},
 };
 
 use crate::{events::ui::UiMessages, state::GlobalState, update::GlobalMessagens};

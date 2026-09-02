@@ -41,11 +41,20 @@ impl GlobalState {
                     self.dir_state.current_file_path = Some(path.to_path_buf());
 
                     let name = path.file_name().unwrap_or_default().display().to_string();
-
-                    self.ui_state.tabs.insert(Tab {
+                    let tab = Tab {
                         tab_name: name,
                         path: path,
-                    });
+                    };
+
+                    self.ui_state.tabs.insert(tab.clone());
+                    if self.ui_state.last_tab.is_none() {
+                        if self.ui_state.tabs.len() > 1 {
+                            self.ui_state.last_tab = Some(tab.clone())
+                        }
+                    }
+                    self.ui_state.current_tab = Some(tab.clone());
+                    println!("c: {:?}", self.ui_state.current_tab);
+                    println!("l: {:?}", self.ui_state.last_tab);
 
                     if let Some(path) = &self.dir_state.current_file_path {
                         if let Some(content) = read_file(path) {

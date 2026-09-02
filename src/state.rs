@@ -1,4 +1,4 @@
-use std::{collections::HashMap, path::PathBuf};
+use std::path::PathBuf;
 
 use iced::{Task, Theme, keyboard, widget::pane_grid};
 use iced_code_editor::CodeEditor;
@@ -73,6 +73,15 @@ pub struct Tab {
     pub path: PathBuf,
 }
 
+impl Default for Tab {
+    fn default() -> Self {
+        Self {
+            path: PathBuf::new(),
+            tab_name: String::new(),
+        }
+    }
+}
+
 pub struct UiState {
     pub current_page: Page,
     pub current_theme: Option<Theme>,
@@ -87,6 +96,8 @@ pub struct UiState {
     pub editor: CodeEditor,
     pub tree: DirectoryTree,
     pub tabs: IndexSet<Tab>,
+    pub current_tab: Option<Tab>,
+    pub last_tab: Option<Tab>,
 }
 
 impl UiState {
@@ -123,6 +134,8 @@ impl UiState {
             editor,
             tree,
             tabs: IndexSet::new(),
+            current_tab: None,
+            last_tab: None,
         }
     }
 }

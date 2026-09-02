@@ -42,18 +42,43 @@ impl GlobalState {
             UiMessages::Tree(e) => self.tree_update(e),
             UiMessages::Editor(e) => self.editor_update(e),
             UiMessages::TabSelected(tab) => {
-                if let Some(content) = read_file(&tab.path) {
+                self.ui_state.current_tab = Some(tab.clone());
+                self.dir_state.current_file_path = Some(tab.path.to_path_buf());
+
+                if self.ui_state.last_tab.is_none() {
+                    self.ui_state.last_tab = Some(tab.clone());
+                } else {
+                    self.ui_state.last_tab = self.ui_state.current_tab.to_owned();
+                }
+                println!("c: {:?}", self.ui_state.current_tab);
+                println!("l: {:?}", self.ui_state.last_tab);
+                self.ui_state
+                    .editor
+                    .reset(&read_file(&tab.path).unwrap_or_default())
+                    .map(|e| GlobalMessagens::UiEvents(UiMessages::Editor(e)))
+            }
+            UiMessages::CloseTab(tab) => {
+                if let Some(last_tab) = self.ui_state.last_tab.to_owned() {
+                    self.ui_state.tabs.shift_remove(&tab);
+                    self.dir_state.current_file_path = Some(last_tab.path.to_path_buf());
+                    self.ui_state.current_tab = Some(last_tab.clone());
+                    if let Some(c) = read_file(&last_tab.path) {
+                        return self
+                            .ui_state
+                            .editor
+                            .reset(&c)
+                            .map(|e| GlobalMessagens::UiEvents(UiMessages::Editor(e)));
+                    }
+                } else {
+                    self.ui_state.tabs.shift_remove(&tab);
+                    self.dir_state.current_file_path = None;
+                    self.ui_state.current_tab = None;
                     return self
                         .ui_state
                         .editor
-                        .reset(&content)
+                        .reset("")
                         .map(|e| GlobalMessagens::UiEvents(UiMessages::Editor(e)));
                 }
-                self.dir_state.current_file_path = Some(tab.path);
-                Task::none()
-            }
-            UiMessages::CloseTab(tab) => {
-                self.ui_state.tabs.shift_remove(&tab);
                 Task::none()
             }
             UiMessages::TerminalEvents(iced_term::Event::BackendCall(id, cmd)) => {
