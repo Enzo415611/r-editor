@@ -42,42 +42,64 @@ impl GlobalState {
             UiMessages::Tree(e) => self.tree_update(e),
             UiMessages::Editor(e) => self.editor_update(e),
             UiMessages::TabSelected(tab) => {
-                self.ui_state.current_tab = Some(tab.clone());
+                if self.ui_state.current_tab.as_ref() != Some(&tab) {
+                    self.ui_state.last_tab = self.ui_state.current_tab.clone();
+                    self.ui_state.current_tab = Some(tab.clone());
+                }
+
                 self.dir_state.current_file_path = Some(tab.path.to_path_buf());
 
-                if self.ui_state.last_tab.is_none() {
-                    self.ui_state.last_tab = Some(tab.clone());
-                } else {
-                    self.ui_state.last_tab = self.ui_state.current_tab.to_owned();
-                }
-                println!("c: {:?}", self.ui_state.current_tab);
-                println!("l: {:?}", self.ui_state.last_tab);
                 self.ui_state
                     .editor
                     .reset(&read_file(&tab.path).unwrap_or_default())
                     .map(|e| GlobalMessagens::UiEvents(UiMessages::Editor(e)))
             }
             UiMessages::CloseTab(tab) => {
-                if let Some(last_tab) = self.ui_state.last_tab.to_owned() {
-                    self.ui_state.tabs.shift_remove(&tab);
-                    self.dir_state.current_file_path = Some(last_tab.path.to_path_buf());
-                    self.ui_state.current_tab = Some(last_tab.clone());
-                    if let Some(c) = read_file(&last_tab.path) {
-                        return self
-                            .ui_state
-                            .editor
-                            .reset(&c)
-                            .map(|e| GlobalMessagens::UiEvents(UiMessages::Editor(e)));
-                    }
-                } else {
-                    self.ui_state.tabs.shift_remove(&tab);
-                    self.dir_state.current_file_path = None;
+                self.ui_state.tabs.shift_remove(&tab);
+
+                if self.ui_state.tabs.is_empty() {
                     self.ui_state.current_tab = None;
+                    self.ui_state.last_tab = None;
+                    self.dir_state.current_file_path = None;
                     return self
                         .ui_state
                         .editor
                         .reset("")
                         .map(|e| GlobalMessagens::UiEvents(UiMessages::Editor(e)));
+                }
+
+                let next_tab = self
+                    .ui_state
+                    .last_tab
+                    .as_ref()
+                    .filter(|last| self.ui_state.tabs.contains(*last))
+                    .cloned()
+                    .or_else(|| self.ui_state.tabs.iter().next().cloned());
+
+                match next_tab {
+                    Some(tab) => {
+                        self.ui_state.current_tab = Some(tab.clone());
+                        self.ui_state.last_tab = None;
+                        self.dir_state.current_file_path = Some(tab.path.to_path_buf());
+
+                        if let Some(content) = read_file(&tab.path) {
+                            return self
+                                .ui_state
+                                .editor
+                                .reset(&content)
+                                .map(|e| GlobalMessagens::UiEvents(UiMessages::Editor(e)));
+                        }
+                    }
+                    None => {
+                        self.ui_state.current_tab = None;
+                        self.ui_state.last_tab = None;
+                        self.dir_state.current_file_path = None;
+                        return self
+                            .ui_state
+                            .editor
+                            .reset("")
+                            .map(|e| GlobalMessagens::UiEvents(UiMessages::Editor(e)));
+                    }
                 }
                 Task::none()
             }
