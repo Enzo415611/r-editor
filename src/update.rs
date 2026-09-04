@@ -46,12 +46,13 @@ impl GlobalState {
                         path: path,
                     };
 
-                    if self.ui_state.current_tab.as_ref() != Some(&tab) {
-                        self.ui_state.last_tab = self.ui_state.current_tab.clone();
-                        self.ui_state.current_tab = Some(tab.clone());
-                    }
-
                     self.ui_state.tabs.insert(tab.clone());
+                    if self.ui_state.last_tab.is_none() {
+                        if self.ui_state.tabs.len() > 1 {
+                            self.ui_state.last_tab = Some(tab.clone())
+                        }
+                    }
+                    self.ui_state.current_tab = Some(tab.clone());
 
                     if let Some(path) = &self.dir_state.current_file_path {
                         if let Some(content) = read_file(path) {
@@ -60,9 +61,6 @@ impl GlobalState {
                                 .map(|event| GlobalMessagens::UiEvents(UiMessages::Editor(event)));
                         }
                     }
-
-                    println!("u: c: {:?}", self.ui_state.current_tab);
-                    println!("U: l: {:?}", self.ui_state.last_tab);
                 }
                 Task::none()
             }

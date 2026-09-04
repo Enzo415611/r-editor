@@ -1,5 +1,5 @@
 use iced::{
-    Background, Color, Element, Length,
+    Color, Element, Length, Theme,
     widget::{button, column, row, rule, scrollable, text},
 };
 
@@ -12,15 +12,16 @@ impl GlobalState {
                 let is_current = self.ui_state.current_tab.as_ref() == Some(tab);
 
                 button(
-                    row![
-                        rule(is_current),
-                        button(text(format!("{}", tab.tab_name)).center().size(16)).on_press(
-                            GlobalMessagens::UiEvents(UiMessages::TabSelected(tab.clone()),)
-                        ),
+                    column![row![
+                        button(text(format!("{}", tab.tab_name)).center().size(16))
+                            .style(move |t, s| button_style(t, s, is_current))
+                            .on_press(GlobalMessagens::UiEvents(UiMessages::TabSelected(
+                                tab.clone()
+                            ),)),
                         button(text("X").size(16).center())
+                            .style(move |t, s| button_style(t, s, is_current))
                             .on_press(GlobalMessagens::UiEvents(UiMessages::CloseTab(tab.clone()))),
-                        rule(is_current),
-                    ]
+                    ],]
                     .padding(0)
                     .spacing(1),
                 )
@@ -39,6 +40,24 @@ impl GlobalState {
             .into()
     }
 }
+
+fn button_style(t: &Theme, s: button::Status, c: bool) -> button::Style {
+    let mut t = button::primary(t, s);
+    if c {
+        t.text_color = Color::WHITE;
+        t.background = Some(iced::Background::Color(Color::from_rgb8(120, 120, 118)));
+    }
+    t
+}
+
 fn rule(is: bool) -> Option<rule::Rule<'static>> {
-    if is { Some(rule::vertical(1)) } else { None }
+    if is {
+        Some(rule::horizontal(4).style(|t| {
+            let mut t = rule::default(t);
+            t.color = Color::from_rgb8(0, 255, 198);
+            t
+        }))
+    } else {
+        None
+    }
 }
