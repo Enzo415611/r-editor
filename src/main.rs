@@ -13,7 +13,7 @@ mod update;
 fn main() -> iced::Result {
     let app = iced::application(GlobalState::new, GlobalState::update, GlobalState::view)
         .title("R Editor")
-        .decorations(false)
+        .decorations(true)
         .transparent(true)
         .resizable(true)
         .font(iced_swdir_tree::LUCIDE_FONT_BYTES)

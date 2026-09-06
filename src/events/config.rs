@@ -21,6 +21,17 @@ impl GlobalState {
 
                 Task::none()
             }
+            ConfigSelected::VimMode(b) => {
+                self.settings.vim_mode = b;
+                self.ui_state.editor.set_vim_enabled(b);
+                Task::none()
+            }
+            ConfigSelected::FontSize(size) => {
+                self.ui_state.editor.set_font_size(size, true);
+                self.settings.font_size = size;
+                Task::none()
+            }
+            _ => Task::none()
         }
     }
 }

@@ -1,7 +1,8 @@
 use iced::{
     Alignment, Element, Length, Theme,
-    widget::{button, column, container, pick_list, row, rule, text},
+    widget::{button, checkbox, column, container, pick_list, row, rule, text},
 };
+use iced_aw::NumberInput;
 
 use crate::{
     events::ui::UiMessages,
@@ -16,6 +17,11 @@ use crate::{
 #[derive(Debug, Clone)]
 pub enum ConfigSelected {
     Theme(iced::Theme),
+    VimMode(bool),
+    FontSize(f32),
+    Wrap(bool),
+    LineNumbers,
+    LineHeight,
 }
 
 impl GlobalState {
@@ -34,9 +40,38 @@ impl GlobalState {
             })
             .style(|t, s| pick_list_style(t, s)),
         ]
+        .align_y(Alignment::Center)
         .height(30);
-        container(column![swap_page, rule::horizontal(1), theme].spacing(3))
+
+        let vim_mode = row![
+            text("Vim Mode")
+                .height(Length::Fill)
+                .align_y(Alignment::End),
+            checkbox(self.settings.vim_mode)
+                .text_line_height(1.0)
+                .on_toggle(|b| GlobalMessagens::ConfigEvents(ConfigSelected::VimMode(b)))
+        ]
+        .align_y(Alignment::Center)
+        .height(30);
+
+        let font_size = row![
+            text("Font Size").height(Length::Fill).center(),
+            NumberInput::new(&self.settings.font_size, 3.0..=30.0, |f| {
+                GlobalMessagens::ConfigEvents(ConfigSelected::FontSize(f))
+            })
+            .line_height(1.0)
+        ]
+        .align_y(Alignment::Center)
+        .height(30);
+
+        container(column![swap_page, rule::horizontal(1), theme, vim_mode, font_size].spacing(3))
             .padding(2)
             .into()
     }
 }
+
+//  pub vim_mode: bool,
+//     pub font_size: f32,
+//     pub wrap: bool,
+//     pub line_numbers: bool,
+//     pub line_height: f32,
