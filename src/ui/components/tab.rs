@@ -1,6 +1,6 @@
 use iced::{
     Color, Element, Length, Theme,
-    widget::{button, column, row, rule, scrollable, text},
+    widget::{button, column, row, scrollable, text},
 };
 
 use crate::{events::ui::UiMessages, state::GlobalState, update::GlobalMessagens};
@@ -48,16 +48,4 @@ fn button_style(t: &Theme, s: button::Status, c: bool) -> button::Style {
         t.background = Some(iced::Background::Color(Color::from_rgb8(120, 120, 118)));
     }
     t
-}
-
-fn rule(is: bool) -> Option<rule::Rule<'static>> {
-    if is {
-        Some(rule::horizontal(4).style(|t| {
-            let mut t = rule::default(t);
-            t.color = Color::from_rgb8(0, 255, 198);
-            t
-        }))
-    } else {
-        None
-    }
 }

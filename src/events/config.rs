@@ -1,4 +1,5 @@
 use iced::{Task, Theme};
+use iced_aw::core::color::HexString;
 
 use crate::{
     state::{AppTheme, GlobalState},
@@ -10,13 +11,25 @@ impl GlobalState {
     pub fn config_update(&mut self, e: ConfigSelected) -> Task<GlobalMessagens> {
         match e {
             ConfigSelected::Theme(t) => {
+                // save new theme
                 self.settings.current_theme = t.clone().into();
                 if let Err(err) = self.save_settings() {
                     eprintln!("{}", err)
                 }
+
+                // editor theme
                 self.ui_state
                     .editor
                     .set_theme(iced_code_editor::from_iced_theme(&t));
+
+                let current_theme = iced_code_editor::from_iced_theme(&t);
+                _ = self
+                    .ui_state
+                    .terminals
+                    .iter_mut()
+                    .map(|t| t.1.1.handle(iced_term::Command::ChangeTheme(todo!())));
+
+                // app theme
                 self.ui_state.current_theme = Some(t);
 
                 Task::none()
@@ -31,7 +44,7 @@ impl GlobalState {
                 self.settings.font_size = size;
                 Task::none()
             }
-            _ => Task::none()
+            _ => Task::none(),
         }
     }
 }
