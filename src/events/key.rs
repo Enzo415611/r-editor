@@ -104,6 +104,7 @@ impl GlobalState {
             ) {
                 if self.ui_state.terminals.is_empty() {
                     let new_term = self.new_terminal(0);
+                    self.ui_state.current_terminal = Some(new_term.0.clone());
                     self.ui_state.terminals.insert(new_term.1.id, new_term);
                 }
 

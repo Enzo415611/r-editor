@@ -1,7 +1,16 @@
 use iced::{
-    Theme,
+    Color, Theme,
     widget::{button, pick_list},
 };
+
+pub fn tab_button_style(t: &Theme, s: button::Status, c: bool) -> button::Style {
+    let mut t = button::primary(t, s);
+    if c {
+        t.text_color = Color::WHITE;
+        t.background = Some(iced::Background::Color(Color::from_rgb8(120, 120, 118)));
+    }
+    t
+}
 
 pub fn button_style(t: &Theme, s: button::Status) -> button::Style {
     let mut style = button::primary(t, s);

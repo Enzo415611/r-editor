@@ -1,25 +1,28 @@
 use iced::{
-    Color, Element, Length, Theme,
+    Element, Length,
     widget::{button, column, row, scrollable, text},
 };
 
-use crate::{events::ui::UiMessages, state::GlobalState, update::GlobalMessagens};
+use crate::{
+    events::ui::UiMessages, state::GlobalState, ui::style::style::tab_button_style,
+    update::GlobalMessagens,
+};
 
 impl GlobalState {
     pub fn tab_view(&self) -> Element<'static, GlobalMessagens> {
         let r = row![]
             .extend(self.ui_state.tabs.iter().map(|tab| {
-                let is_current = self.ui_state.current_tab.as_ref() == Some(tab);
+                let is_current = self.ui_state.current_file.as_ref() == Some(tab);
 
                 button(
                     column![row![
                         button(text(format!("{}", tab.tab_name)).center().size(16))
-                            .style(move |t, s| button_style(t, s, is_current))
+                            .style(move |t, s| tab_button_style(t, s, is_current))
                             .on_press(GlobalMessagens::UiEvents(UiMessages::TabSelected(
                                 tab.clone()
                             ),)),
                         button(text("X").size(16).center())
-                            .style(move |t, s| button_style(t, s, is_current))
+                            .style(move |t, s| tab_button_style(t, s, is_current))
                             .on_press(GlobalMessagens::UiEvents(UiMessages::CloseTab(tab.clone()))),
                     ],]
                     .padding(0)
@@ -39,13 +42,4 @@ impl GlobalState {
             .spacing(2)
             .into()
     }
-}
-
-fn button_style(t: &Theme, s: button::Status, c: bool) -> button::Style {
-    let mut t = button::primary(t, s);
-    if c {
-        t.text_color = Color::WHITE;
-        t.background = Some(iced::Background::Color(Color::from_rgb8(120, 120, 118)));
-    }
-    t
 }

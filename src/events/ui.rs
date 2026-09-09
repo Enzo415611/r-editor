@@ -1,3 +1,5 @@
+use std::fmt::Debug;
+
 use iced::{
     Task,
     advanced::widget::{operate, operation::focusable::unfocus},
@@ -8,6 +10,7 @@ use iced_swdir_tree::DirectoryTreeEvent;
 use crate::{
     file::read_file,
     state::{GlobalState, Tab},
+    term::TerminalInfo,
     ui::view::Page,
     update::GlobalMessagens,
 };
@@ -25,6 +28,9 @@ pub enum UiMessages {
     TerminalEvents(iced_term::Event),
     TerminalEnters,
     TerminalExit,
+    NewTerminal,
+    TerminalTabSelected(TerminalInfo),
+    CloseTerminal(u64),
 }
 
 impl GlobalState {
@@ -42,9 +48,9 @@ impl GlobalState {
             UiMessages::Tree(e) => self.tree_update(e),
             UiMessages::Editor(e) => self.editor_update(e),
             UiMessages::TabSelected(tab) => {
-                if self.ui_state.current_tab.as_ref() != Some(&tab) {
-                    self.ui_state.last_tab = self.ui_state.current_tab.clone();
-                    self.ui_state.current_tab = Some(tab.clone());
+                if self.ui_state.current_file.as_ref() != Some(&tab) {
+                    self.ui_state.last_tab = self.ui_state.current_file.clone();
+                    self.ui_state.current_file = Some(tab.clone());
                 }
 
                 self.dir_state.current_file_path = Some(tab.path.to_path_buf());
@@ -58,7 +64,7 @@ impl GlobalState {
                 self.ui_state.tabs.shift_remove(&tab);
 
                 if self.ui_state.tabs.is_empty() {
-                    self.ui_state.current_tab = None;
+                    self.ui_state.current_file = None;
                     self.ui_state.last_tab = None;
                     self.dir_state.current_file_path = None;
                     return self
@@ -78,7 +84,7 @@ impl GlobalState {
 
                 match next_tab {
                     Some(tab) => {
-                        self.ui_state.current_tab = Some(tab.clone());
+                        self.ui_state.current_file = Some(tab.clone());
                         self.ui_state.last_tab = None;
                         self.dir_state.current_file_path = Some(tab.path.to_path_buf());
 
@@ -91,7 +97,7 @@ impl GlobalState {
                         }
                     }
                     None => {
-                        self.ui_state.current_tab = None;
+                        self.ui_state.current_file = None;
                         self.ui_state.last_tab = None;
                         self.dir_state.current_file_path = None;
                         return self
@@ -127,6 +133,51 @@ impl GlobalState {
                 operate(unfocus())
             }
             UiMessages::OpenOrCloseTerm => self.open_terminal_pane(),
+            UiMessages::NewTerminal => {
+                let new_term_id = if let Some(last_term) = self.ui_state.terminals.last() {
+                    last_term.0 + 1
+                } else {
+                    0
+                };
+
+                let new_term = self.new_terminal(new_term_id);
+                self.ui_state.current_terminal = Some(new_term.0.clone());
+                self.ui_state.last_terminal = Some(new_term.0.clone());
+                self.ui_state.terminals.insert(new_term_id, new_term);
+                Task::none()
+            }
+            UiMessages::TerminalTabSelected(t) => {
+                self.ui_state.current_terminal = Some(t);
+                Task::none()
+            }
+            UiMessages::CloseTerminal(id) => {
+                self.ui_state.terminals.shift_remove(&id);
+
+                if self.ui_state.terminals.is_empty() {
+                    self.ui_state.current_terminal = None;
+                    self.ui_state.last_terminal = None;
+                }
+
+                let next_term_tab = self
+                    .ui_state
+                    .last_terminal
+                    .as_ref()
+                    .filter(|last| self.ui_state.terminals.contains_key(&last.id))
+                    .or_else(|| self.ui_state.terminals.iter().next().map(|(_, t)| &t.0));
+
+                match next_term_tab {
+                    Some(t) => {
+                        self.ui_state.current_terminal = Some(t.clone());
+                        self.ui_state.last_terminal = None;
+                    }
+                    None => {
+                        self.ui_state.current_terminal = None;
+                        self.ui_state.last_terminal = None;
+                    }
+                }
+
+                Task::none()
+            }
         }
     }
 }

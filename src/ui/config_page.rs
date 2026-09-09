@@ -78,9 +78,3 @@ impl GlobalState {
             .into()
     }
 }
-
-//  pub vim_mode: bool,
-//     pub font_size: f32,
-//     pub wrap: bool,
-//     pub line_numbers: bool,
-//     pub line_height: f32,

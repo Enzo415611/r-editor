@@ -1,5 +1,4 @@
 use iced::{Task, Theme};
-use iced_aw::core::color::HexString;
 
 use crate::{
     state::{AppTheme, GlobalState},
@@ -21,13 +20,6 @@ impl GlobalState {
                 self.ui_state
                     .editor
                     .set_theme(iced_code_editor::from_iced_theme(&t));
-
-                let current_theme = iced_code_editor::from_iced_theme(&t);
-                _ = self
-                    .ui_state
-                    .terminals
-                    .iter_mut()
-                    .map(|t| t.1.1.handle(iced_term::Command::ChangeTheme(todo!())));
 
                 // app theme
                 self.ui_state.current_theme = Some(t);

@@ -93,10 +93,12 @@ pub struct UiState {
     pub terminal_pane: pane_grid::Pane,
     pub terminal_pane_is_open: bool,
     pub terminals: IndexMap<u64, (TerminalInfo, Terminal)>,
+    pub current_terminal: Option<TerminalInfo>,
+    pub last_terminal: Option<TerminalInfo>,
     pub editor: CodeEditor,
     pub tree: DirectoryTree,
     pub tabs: IndexSet<Tab>,
-    pub current_tab: Option<Tab>,
+    pub current_file: Option<Tab>,
     pub last_tab: Option<Tab>,
 }
 
@@ -131,10 +133,12 @@ impl UiState {
             terminal_pane_is_open: false,
             terminal_pane: terminal_pane,
             terminals: IndexMap::new(),
+            current_terminal: None,
+            last_terminal: None,
             editor,
             tree,
             tabs: IndexSet::new(),
-            current_tab: None,
+            current_file: None,
             last_tab: None,
         }
     }

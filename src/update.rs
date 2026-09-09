@@ -1,3 +1,5 @@
+use std::fmt::Debug;
+
 use iced::{Task, keyboard};
 use iced_swdir_tree::DirectoryTreeEvent;
 
@@ -52,7 +54,7 @@ impl GlobalState {
                             self.ui_state.last_tab = Some(tab.clone())
                         }
                     }
-                    self.ui_state.current_tab = Some(tab.clone());
+                    self.ui_state.current_file = Some(tab.clone());
 
                     if let Some(path) = &self.dir_state.current_file_path {
                         if let Some(content) = read_file(path) {
