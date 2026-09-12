@@ -6,7 +6,7 @@ use iced_aw::{Menu, MenuBar, menu::Item, menu_items};
 
 use crate::{
     GlobalState,
-    events::file::FileEvents,
+    events::{file::FileEvents, terminal::TerminalEvents},
     ui::{style::style::button_style, view::Page},
     update::GlobalMessagens,
 };
@@ -40,7 +40,9 @@ impl GlobalState {
                         .width(Length::Fill)
                         .style(|t, s| button_style(t, s))
                         .on_press(GlobalMessagens::UiEvents(
-                            crate::events::ui::UiMessages::OpenOrCloseTerm
+                            crate::events::ui::UiMessages::TerminalEvents(
+                                TerminalEvents::OpenOrCloseTerm
+                            )
                         ))
                 )
             ])

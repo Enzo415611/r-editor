@@ -70,7 +70,7 @@ fn get_system_shell() -> String {
         if which::which("pwsh").is_ok() {
             return "powershell".to_string();
         }
-        return env::var("COMSPEC").unwrap_or_ekse(|_| "cmd.exe".to_string());
+        return env::var("COMSPEC").unwrap_or_else(|_| "cmd.exe".to_string());
     }
 
     #[cfg(not(windows))]

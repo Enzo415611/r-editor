@@ -5,6 +5,7 @@ use iced_swdir_tree::DirectoryTree;
 
 use crate::{
     GlobalState,
+    events::ui::UiMessages,
     file::{pick_file, pick_folder, read_file},
     update::GlobalMessagens,
 };
@@ -29,11 +30,11 @@ impl GlobalState {
             FileEvents::OpenFileLoaded(path) => {
                 self.dir_state.current_file_path = path;
                 if let Some(path) = &self.dir_state.current_file_path {
+                    self.settings.file_path = path.to_path_buf();
                     if let Some(content) = read_file(path) {
                         let task = self.ui_state.editor.reset(&content);
-                        return task.map(|event| {
-                            GlobalMessagens::UiEvents(super::ui::UiMessages::Editor(event))
-                        });
+                        return task
+                            .map(|event| GlobalMessagens::UiEvents(UiMessages::Editor(event)));
                     }
                 }
                 Task::none()
@@ -59,6 +60,7 @@ impl GlobalState {
                     self.ui_state.tabs.clear();
                     self.dir_state.current_dir_path = None;
                     self.settings.dir_path = PathBuf::new();
+                    self.settings.file_path = PathBuf::new();
                     if let Err(err) = self.save_settings() {
                         eprintln!("{}", err)
                     }

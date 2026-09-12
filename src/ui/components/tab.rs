@@ -4,7 +4,9 @@ use iced::{
 };
 
 use crate::{
-    events::ui::UiMessages, state::GlobalState, ui::style::style::tab_button_style,
+    events::{tab::TabEvents, ui::UiMessages},
+    state::GlobalState,
+    ui::style::style::tab_button_style,
     update::GlobalMessagens,
 };
 
@@ -18,12 +20,14 @@ impl GlobalState {
                     column![row![
                         button(text(format!("{}", tab.tab_name)).center().size(16))
                             .style(move |t, s| tab_button_style(t, s, is_current))
-                            .on_press(GlobalMessagens::UiEvents(UiMessages::TabSelected(
-                                tab.clone()
-                            ),)),
+                            .on_press(GlobalMessagens::UiEvents(UiMessages::TabEvents(
+                                TabEvents::TabSelected(tab.clone())
+                            ))),
                         button(text("X").size(16).center())
                             .style(move |t, s| tab_button_style(t, s, is_current))
-                            .on_press(GlobalMessagens::UiEvents(UiMessages::CloseTab(tab.clone()))),
+                            .on_press(GlobalMessagens::UiEvents(UiMessages::TabEvents(
+                                TabEvents::CloseTab(tab.clone())
+                            ))),
                     ],]
                     .padding(0)
                     .spacing(1),

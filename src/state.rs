@@ -22,6 +22,7 @@ pub struct Settings {
     pub line_numbers: bool,
     pub line_height: f32,
     pub dir_path: PathBuf,
+    pub file_path: PathBuf,
 }
 
 impl Default for Settings {
@@ -34,6 +35,7 @@ impl Default for Settings {
             line_numbers: true,
             line_height: 20.0,
             dir_path: PathBuf::new(),
+            file_path: PathBuf::new(),
         }
     }
 }

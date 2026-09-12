@@ -41,7 +41,7 @@ impl GlobalState {
                 if !is_dir {
                     // if false is file
                     self.dir_state.current_file_path = Some(path.to_path_buf());
-
+                    self.settings.file_path = path.to_path_buf();
                     let name = path.file_name().unwrap_or_default().display().to_string();
                     let tab = Tab {
                         tab_name: name,
