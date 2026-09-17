@@ -3,14 +3,13 @@ use std::path::PathBuf;
 use iced::Task;
 
 use crate::{
-    events::ui::UiMessages,
+    events::{ui::UiMessages, update::GlobalEvents},
     file::read_file,
     state::{GlobalState, Tab},
-    update::GlobalMessagens,
 };
 
 impl GlobalState {
-    pub fn tab_events(&mut self, e: TabEvents) -> Task<GlobalMessagens> {
+    pub fn tab_events(&mut self, e: TabEvents) -> Task<GlobalEvents> {
         match e {
             TabEvents::TabSelected(tab) => {
                 self.settings.file_path = tab.path.to_path_buf();
@@ -21,14 +20,20 @@ impl GlobalState {
 
                 self.dir_state.current_file_path = Some(tab.path.to_path_buf());
 
+                _ = self.save_settings();
+
                 self.ui_state
                     .editor
                     .reset(&read_file(&tab.path).unwrap_or_default())
-                    .map(|e| GlobalMessagens::UiEvents(UiMessages::Editor(e)))
+                    .map(|e| GlobalEvents::UiEvents(UiMessages::Editor(e)))
             }
             TabEvents::CloseTab(tab) => {
-                self.ui_state.tabs.shift_remove(&tab);
+                if &tab.path == &self.settings.file_path {
+                    self.settings.file_path = PathBuf::new();
+                    _ = self.save_settings();
+                }
 
+                self.ui_state.tabs.shift_remove(&tab);
                 if self.ui_state.tabs.is_empty() {
                     self.ui_state.current_file = None;
                     self.ui_state.last_tab = None;
@@ -38,7 +43,7 @@ impl GlobalState {
                         .ui_state
                         .editor
                         .reset("")
-                        .map(|e| GlobalMessagens::UiEvents(UiMessages::Editor(e)));
+                        .map(|e| GlobalEvents::UiEvents(UiMessages::Editor(e)));
                 }
 
                 let next_tab = self
@@ -61,7 +66,7 @@ impl GlobalState {
                                 .ui_state
                                 .editor
                                 .reset(&content)
-                                .map(|e| GlobalMessagens::UiEvents(UiMessages::Editor(e)));
+                                .map(|e| GlobalEvents::UiEvents(UiMessages::Editor(e)));
                         }
                     }
                     None => {
@@ -74,7 +79,7 @@ impl GlobalState {
                             .ui_state
                             .editor
                             .reset("")
-                            .map(|e| GlobalMessagens::UiEvents(UiMessages::Editor(e)));
+                            .map(|e| GlobalEvents::UiEvents(UiMessages::Editor(e)));
                     }
                 }
                 Task::none()

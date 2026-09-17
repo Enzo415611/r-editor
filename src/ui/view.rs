@@ -3,7 +3,10 @@ use iced::{
     widget::{column, container, pane_grid, row, rule},
 };
 
-use crate::{GlobalState, events::ui::UiMessages::ResizeEvent, update::GlobalMessagens};
+use crate::{
+    GlobalState,
+    events::{ui::UiMessages::ResizeEvent, update::GlobalEvents},
+};
 
 #[derive(Debug, Clone)]
 pub enum Page {
@@ -19,7 +22,7 @@ pub enum Pane {
 }
 
 impl GlobalState {
-    pub fn view(&self) -> Element<'_, GlobalMessagens> {
+    pub fn view(&self) -> Element<'_, GlobalEvents> {
         let editor_grid = pane_grid(&self.ui_state.editor_grid, |_, state, _| match state {
             Pane::FileTree => container(row![self.file_tree_view(), rule::vertical(1)]).into(),
             Pane::Editor => row![
@@ -37,7 +40,7 @@ impl GlobalState {
             s.hovered_region.border = iced::border::color(s.hovered_split.color).width(1.0);
             s
         })
-        .on_resize(10, |e| GlobalMessagens::UiEvents(ResizeEvent(e)));
+        .on_resize(10, |e| GlobalEvents::UiEvents(ResizeEvent(e)));
 
         let editor_page =
             container(column![self.top_bar(), rule::horizontal(1), editor_grid]).padding(2);

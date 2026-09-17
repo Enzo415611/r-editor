@@ -11,7 +11,7 @@ use crate::{
 };
 
 #[derive(Debug, Clone)]
-pub enum GlobalMessagens {
+pub enum GlobalEvents {
     InitConfig,
     Test,
     UiEvents(UiMessages),
@@ -21,21 +21,30 @@ pub enum GlobalMessagens {
 }
 
 impl GlobalState {
-    pub fn update(&mut self, events: GlobalMessagens) -> Task<GlobalMessagens> {
+    pub fn update(&mut self, events: GlobalEvents) -> Task<GlobalEvents> {
         match events {
-            GlobalMessagens::InitConfig => {
+            GlobalEvents::InitConfig => {
                 _ = self.load_settings();
+
+                if let Some(path) = self.dir_state.current_dir_path.to_owned() {
+                    return self
+                        .ui_state
+                        .tree
+                        .update(iced_swdir_tree::DirectoryTreeEvent::Toggled(path))
+                        .map(|e| GlobalEvents::UiEvents(UiMessages::Tree(e)));
+                }
+
                 Task::none()
             }
-            GlobalMessagens::Test => Task::none(),
-            GlobalMessagens::File(e) => self.file_update(e),
-            GlobalMessagens::KeyEvent(e) => self.key_update(e),
-            GlobalMessagens::ConfigEvents(e) => self.config_update(e),
-            GlobalMessagens::UiEvents(e) => self.ui_events(e),
+            GlobalEvents::Test => Task::none(),
+            GlobalEvents::File(e) => self.file_update(e),
+            GlobalEvents::KeyEvent(e) => self.key_update(e),
+            GlobalEvents::ConfigEvents(e) => self.config_update(e),
+            GlobalEvents::UiEvents(e) => self.ui_events(e),
         }
     }
 
-    pub fn tree_update(&mut self, e: DirectoryTreeEvent) -> Task<GlobalMessagens> {
+    pub fn tree_update(&mut self, e: DirectoryTreeEvent) -> Task<GlobalEvents> {
         match e {
             DirectoryTreeEvent::Selected(path, is_dir, _) => {
                 if !is_dir {
@@ -56,11 +65,13 @@ impl GlobalState {
                     }
                     self.ui_state.current_file = Some(tab.clone());
 
+                    _ = self.save_settings();
+
                     if let Some(path) = &self.dir_state.current_file_path {
                         if let Some(content) = read_file(path) {
                             let task = self.ui_state.editor.reset(&content);
                             return task
-                                .map(|event| GlobalMessagens::UiEvents(UiMessages::Editor(event)));
+                                .map(|event| GlobalEvents::UiEvents(UiMessages::Editor(event)));
                         }
                     }
                 }
@@ -70,7 +81,7 @@ impl GlobalState {
                 .ui_state
                 .tree
                 .update(e)
-                .map(|e| GlobalMessagens::UiEvents(UiMessages::Tree(e))),
+                .map(|e| GlobalEvents::UiEvents(UiMessages::Tree(e))),
         }
     }
 }

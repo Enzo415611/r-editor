@@ -8,9 +8,9 @@ use indexmap::{IndexMap, IndexSet};
 use serde::{Deserialize, Serialize};
 
 use crate::{
+    events::update::GlobalEvents,
     term::TerminalInfo,
     ui::view::{Page, Pane},
-    update::GlobalMessagens,
 };
 
 #[derive(Serialize, Deserialize, Clone)]
@@ -49,7 +49,7 @@ pub struct GlobalState {
 }
 
 impl GlobalState {
-    pub fn new() -> (Self, Task<GlobalMessagens>) {
+    pub fn new() -> (Self, Task<GlobalEvents>) {
         (
             Self {
                 dir_state: DirState::new(),
@@ -58,7 +58,7 @@ impl GlobalState {
                 binds_state: BindsState::new(),
                 settings: Settings::default(),
             },
-            Task::done(GlobalMessagens::InitConfig),
+            Task::done(GlobalEvents::InitConfig),
         )
     }
 
@@ -129,7 +129,7 @@ impl UiState {
             current_theme: Some(Theme::CatppuccinMocha),
             editor_grid: state,
             file_tree_pane: file_tree_pane,
-            file_tree_resize: (split, 0.),
+            file_tree_resize: (split, 0.5),
             editor_pane: editor_pane,
             file_tree_is_open: true,
             terminal_pane_is_open: false,

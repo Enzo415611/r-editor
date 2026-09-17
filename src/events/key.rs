@@ -7,10 +7,13 @@ use iced::{
     widget::{operation::focus_next, pane_grid},
 };
 
-use crate::{GlobalState, events::ui::UiMessages, update::GlobalMessagens};
+use crate::{
+    GlobalState,
+    events::{ui::UiMessages, update::GlobalEvents},
+};
 
 impl GlobalState {
-    pub fn key_update(&mut self, e: keyboard::Event) -> Task<GlobalMessagens> {
+    pub fn key_update(&mut self, e: keyboard::Event) -> Task<GlobalEvents> {
         match e {
             keyboard::Event::KeyPressed {
                 key,
@@ -87,12 +90,12 @@ impl GlobalState {
         }
     }
 
-    pub fn open_terminal_pane(&mut self) -> Task<GlobalMessagens> {
+    pub fn open_terminal_pane(&mut self) -> Task<GlobalEvents> {
         if self.ui_state.terminal_pane_is_open {
             if let Some((_, pane)) = self.ui_state.editor_grid.close(self.ui_state.terminal_pane) {
                 self.ui_state.terminal_pane = pane;
                 self.ui_state.terminal_pane_is_open = false;
-                return Task::done(GlobalMessagens::UiEvents(UiMessages::Editor(
+                return Task::done(GlobalEvents::UiEvents(UiMessages::Editor(
                     iced_code_editor::Message::CanvasFocusGained,
                 )));
             }

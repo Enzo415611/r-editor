@@ -1,13 +1,13 @@
 use iced::{Task, Theme};
 
 use crate::{
+    events::update::GlobalEvents,
     state::{AppTheme, GlobalState},
     ui::config_page::ConfigSelected,
-    update::GlobalMessagens,
 };
 
 impl GlobalState {
-    pub fn config_update(&mut self, e: ConfigSelected) -> Task<GlobalMessagens> {
+    pub fn config_update(&mut self, e: ConfigSelected) -> Task<GlobalEvents> {
         match e {
             ConfigSelected::Theme(t) => {
                 // save new theme

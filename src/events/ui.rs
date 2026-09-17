@@ -4,10 +4,9 @@ use iced::{Task, widget::pane_grid};
 use iced_swdir_tree::DirectoryTreeEvent;
 
 use crate::{
-    events::{tab::TabEvents, terminal::TerminalEvents},
+    events::{tab::TabEvents, terminal::TerminalEvents, update::GlobalEvents},
     state::GlobalState,
     ui::view::Page,
-    update::GlobalMessagens,
 };
 
 #[derive(Debug, Clone)]
@@ -21,7 +20,7 @@ pub enum UiMessages {
 }
 
 impl GlobalState {
-    pub fn ui_events(&mut self, e: UiMessages) -> Task<GlobalMessagens> {
+    pub fn ui_events(&mut self, e: UiMessages) -> Task<GlobalEvents> {
         match e {
             UiMessages::SwapPage(page) => {
                 self.ui_state.current_page = page;

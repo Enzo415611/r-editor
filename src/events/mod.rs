@@ -5,3 +5,4 @@ pub mod key;
 pub mod tab;
 pub mod terminal;
 pub mod ui;
+pub mod update;

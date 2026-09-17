@@ -4,7 +4,7 @@ use iced::{
     widget::operation::focus_next,
 };
 
-use crate::{state::GlobalState, term::TerminalInfo, update::GlobalMessagens};
+use crate::{events::update::GlobalEvents, state::GlobalState, term::TerminalInfo};
 
 #[derive(Debug, Clone)]
 pub enum TerminalEvents {
@@ -19,7 +19,7 @@ pub enum TerminalEvents {
 }
 
 impl GlobalState {
-    pub fn terminal_events(&mut self, e: TerminalEvents) -> Task<GlobalMessagens> {
+    pub fn terminal_events(&mut self, e: TerminalEvents) -> Task<GlobalEvents> {
         match e {
             TerminalEvents::TerminalEvents(iced_term::Event::BackendCall(id, cmd)) => {
                 if let Some(t) = self.ui_state.terminals.get_mut(&id) {

@@ -5,13 +5,12 @@ use iced::{
 use iced_aw::NumberInput;
 
 use crate::{
-    events::ui::UiMessages,
+    events::{ui::UiMessages, update::GlobalEvents},
     state::GlobalState,
     ui::{
         style::style::{button_style, pick_list_style},
         view::Page,
     },
-    update::GlobalMessagens,
 };
 
 #[derive(Debug, Clone)]
@@ -25,18 +24,18 @@ pub enum ConfigSelected {
 }
 
 impl GlobalState {
-    pub fn config_page_view(&self) -> Element<'_, GlobalMessagens> {
+    pub fn config_page_view(&self) -> Element<'_, GlobalEvents> {
         let swap_page = button(text("<").align_x(Alignment::Center))
             .padding(0)
             .width(20)
             .style(|t, s| button_style(t, s))
-            .on_press(GlobalMessagens::UiEvents(UiMessages::SwapPage(
+            .on_press(GlobalEvents::UiEvents(UiMessages::SwapPage(
                 Page::EditorPage,
             )));
 
         let theme = row![
             pick_list(Theme::ALL, self.ui_state.current_theme.clone(), |t| {
-                GlobalMessagens::ConfigEvents(ConfigSelected::Theme(t))
+                GlobalEvents::ConfigEvents(ConfigSelected::Theme(t))
             })
             .style(|t, s| pick_list_style(t, s)),
             text("Select Theme: ").height(Length::Fill).center()
@@ -54,11 +53,11 @@ impl GlobalState {
                 theme.border.radius = iced::border::Radius::new(10);
                 theme
             })
-            .on_toggle(|b| GlobalMessagens::ConfigEvents(ConfigSelected::VimMode(b)));
+            .on_toggle(|b| GlobalEvents::ConfigEvents(ConfigSelected::VimMode(b)));
 
         let font_size = row![
             NumberInput::new(&self.settings.font_size, 3.0..=30.0, |f| {
-                GlobalMessagens::ConfigEvents(ConfigSelected::FontSize(f))
+                GlobalEvents::ConfigEvents(ConfigSelected::FontSize(f))
             })
             .ignore_buttons(true)
             .line_height(1.0)

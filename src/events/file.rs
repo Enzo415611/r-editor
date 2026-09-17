@@ -5,9 +5,8 @@ use iced_swdir_tree::DirectoryTree;
 
 use crate::{
     GlobalState,
-    events::ui::UiMessages,
+    events::{ui::UiMessages, update::GlobalEvents},
     file::{pick_file, pick_folder, read_file},
-    update::GlobalMessagens,
 };
 
 #[derive(Debug, Clone)]
@@ -22,37 +21,45 @@ pub enum FileEvents {
 }
 
 impl GlobalState {
-    pub fn file_update(&mut self, events: FileEvents) -> Task<GlobalMessagens> {
+    pub fn file_update(&mut self, events: FileEvents) -> Task<GlobalEvents> {
         match events {
             FileEvents::OpenFile => Task::perform(pick_file(), |r| {
-                GlobalMessagens::File(FileEvents::OpenFileLoaded(r))
+                GlobalEvents::File(FileEvents::OpenFileLoaded(r))
             }),
             FileEvents::OpenFileLoaded(path) => {
-                self.dir_state.current_file_path = path;
-                if let Some(path) = &self.dir_state.current_file_path {
-                    self.settings.file_path = path.to_path_buf();
-                    if let Some(content) = read_file(path) {
+                if let Some(path) = path {
+                    if let Some(content) = read_file(&path) {
+                        self.settings.file_path = path.to_path_buf();
+                        self.dir_state.current_file_path = Some(path);
+
                         let task = self.ui_state.editor.reset(&content);
-                        return task
-                            .map(|event| GlobalMessagens::UiEvents(UiMessages::Editor(event)));
+                        return task.map(|event| GlobalEvents::UiEvents(UiMessages::Editor(event)));
                     }
                 }
                 Task::none()
             }
             FileEvents::OpenFolder => Task::perform(pick_folder(), |r| {
-                GlobalMessagens::File(FileEvents::OpenFolderLoaded(r))
+                GlobalEvents::File(FileEvents::OpenFolderLoaded(r))
             }),
             FileEvents::OpenFolderLoaded(path) => {
                 if let Some(path) = &path {
                     self.settings.dir_path = path.to_path_buf();
+                    self.dir_state.current_dir_path = Some(path.to_path_buf());
+                    self.ui_state.tree = DirectoryTree::new(path.to_path_buf());
+
                     if let Err(err) = self.save_settings() {
                         eprintln!("{}", err)
                     }
-                }
-                self.dir_state.current_dir_path = path;
 
-                self.ui_state.tree =
-                    DirectoryTree::new(self.dir_state.current_dir_path.clone().unwrap_or_default());
+                    return self
+                        .ui_state
+                        .tree
+                        .update(iced_swdir_tree::DirectoryTreeEvent::Toggled(
+                            path.to_path_buf(),
+                        ))
+                        .map(|e| GlobalEvents::UiEvents(UiMessages::Tree(e)));
+                }
+
                 Task::none()
             }
             FileEvents::CloseFolder => {
@@ -68,7 +75,7 @@ impl GlobalState {
                         .ui_state
                         .editor
                         .reset("")
-                        .map(|e| GlobalMessagens::UiEvents(super::ui::UiMessages::Editor(e)));
+                        .map(|e| GlobalEvents::UiEvents(super::ui::UiMessages::Editor(e)));
                 }
                 Task::none()
             }

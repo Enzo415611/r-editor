@@ -1,10 +1,13 @@
 use iced::Task;
 
-use crate::{GlobalState, events::ui::UiMessages, update::GlobalMessagens};
+use crate::{
+    GlobalState,
+    events::{ui::UiMessages, update::GlobalEvents},
+};
 use iced_code_editor::Message as EditorMessage;
 
 impl GlobalState {
-    pub fn editor_update(&mut self, e: iced_code_editor::Message) -> Task<GlobalMessagens> {
+    pub fn editor_update(&mut self, e: iced_code_editor::Message) -> Task<GlobalEvents> {
         match e {
             EditorMessage::CharacterInput(_)
             | EditorMessage::Delete
@@ -18,7 +21,7 @@ impl GlobalState {
                     .ui_state
                     .editor
                     .update(&e)
-                    .map(|e| GlobalMessagens::UiEvents(UiMessages::Editor(e)));
+                    .map(|e| GlobalEvents::UiEvents(UiMessages::Editor(e)));
                 if self.config_state.auto_save_is_active {
                     self.save_file();
                 }
@@ -33,7 +36,7 @@ impl GlobalState {
                 .ui_state
                 .editor
                 .update(&e)
-                .map(|e| GlobalMessagens::UiEvents(UiMessages::Editor(e))),
+                .map(|e| GlobalEvents::UiEvents(UiMessages::Editor(e))),
         }
     }
 }

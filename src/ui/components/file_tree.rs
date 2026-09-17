@@ -5,18 +5,17 @@ use iced::{
 
 use crate::{
     GlobalState,
-    events::{file::FileEvents, ui::UiMessages},
+    events::{file::FileEvents, ui::UiMessages, update::GlobalEvents},
     ui::style::style::button_style,
-    update::GlobalMessagens,
 };
 
 impl GlobalState {
-    pub fn file_tree_view(&self) -> Element<'_, GlobalMessagens> {
+    pub fn file_tree_view(&self) -> Element<'_, GlobalEvents> {
         let tree_view = if self.dir_state.current_dir_path.is_none() {
             container(
                 button("Open Folder")
                     .style(|t, s| button_style(t, s))
-                    .on_press(GlobalMessagens::File(FileEvents::OpenFolder)),
+                    .on_press(GlobalEvents::File(FileEvents::OpenFolder)),
             )
             .align_y(Alignment::Center)
             .align_x(Alignment::Center)
@@ -27,7 +26,7 @@ impl GlobalState {
             container(
                 self.ui_state
                     .tree
-                    .view(|e| GlobalMessagens::UiEvents(UiMessages::Tree(e))),
+                    .view(|e| GlobalEvents::UiEvents(UiMessages::Tree(e))),
             )
             .into()
         };

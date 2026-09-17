@@ -4,17 +4,16 @@ use iced::{
 };
 
 use crate::{
-    events::{terminal::TerminalEvents, ui::UiMessages},
+    events::{terminal::TerminalEvents, ui::UiMessages, update::GlobalEvents},
     state::GlobalState,
-    update::GlobalMessagens,
 };
 
 impl GlobalState {
-    pub fn terminal_view(&self) -> Element<'_, GlobalMessagens> {
+    pub fn terminal_view(&self) -> Element<'_, GlobalEvents> {
         let term = if let Some(t) = &self.ui_state.current_terminal {
             if let Some((_, t)) = self.ui_state.terminals.get(&t.id) {
                 Some(iced_term::TerminalView::show(t).map(|e| {
-                    GlobalMessagens::UiEvents(UiMessages::TerminalEvents(
+                    GlobalEvents::UiEvents(UiMessages::TerminalEvents(
                         TerminalEvents::TerminalEvents(e),
                     ))
                 }))
@@ -30,7 +29,7 @@ impl GlobalState {
             self.terminal_tab_view(),
             term
         ]))
-        .on_enter(GlobalMessagens::UiEvents(UiMessages::TerminalEvents(
+        .on_enter(GlobalEvents::UiEvents(UiMessages::TerminalEvents(
             TerminalEvents::TerminalEnters,
         )))
         .into()

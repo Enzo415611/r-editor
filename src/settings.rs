@@ -1,6 +1,6 @@
 use iced_swdir_tree::DirectoryTree;
 
-use crate::state::{GlobalState, Settings};
+use crate::state::{GlobalState, Settings, Tab};
 
 impl GlobalState {
     pub fn load_settings(&mut self) -> anyhow::Result<()> {
@@ -42,6 +42,26 @@ impl GlobalState {
         if !self.settings.dir_path.is_empty() {
             self.dir_state.current_dir_path = Some(self.settings.dir_path.to_path_buf());
         }
+
+        // file path
+        self.dir_state.current_file_path = Some(self.settings.file_path.to_path_buf());
+
+        if !self.settings.dir_path.is_empty() {
+            if !self.settings.file_path.is_empty() {
+                let tab = Tab {
+                    path: self.settings.file_path.to_path_buf(),
+                    tab_name: self
+                        .settings
+                        .file_path
+                        .file_name()
+                        .unwrap_or_default()
+                        .display()
+                        .to_string(),
+                };
+                self.ui_state.tabs.insert(tab);
+            }
+        }
+
         // update file tree with dir path
         if let Some(path) = &self.dir_state.current_dir_path {
             self.ui_state.tree = DirectoryTree::new(path.to_path_buf());

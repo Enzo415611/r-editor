@@ -1,9 +1,8 @@
 use iced::{Subscription, keyboard};
 
 use crate::{
-    events::{terminal::TerminalEvents, ui::UiMessages},
+    events::{terminal::TerminalEvents, ui::UiMessages, update::GlobalEvents},
     state::GlobalState,
-    update::GlobalMessagens,
 };
 
 mod events;
@@ -12,7 +11,6 @@ mod settings;
 mod state;
 mod term;
 mod ui;
-mod update;
 
 fn main() -> iced::Result {
     let app = iced::application(GlobalState::new, GlobalState::update, GlobalState::view)
@@ -27,13 +25,13 @@ fn main() -> iced::Result {
 }
 
 impl GlobalState {
-    fn subscription(&self) -> Subscription<GlobalMessagens> {
-        let keys = keyboard::listen().map(|e| GlobalMessagens::KeyEvent(e));
+    fn subscription(&self) -> Subscription<GlobalEvents> {
+        let keys = keyboard::listen().map(|e| GlobalEvents::KeyEvent(e));
         let term = Subscription::batch(self.ui_state.terminals.iter().map(|t| {
             t.1.1.subscription().map(|e| {
-                GlobalMessagens::UiEvents(UiMessages::TerminalEvents(
-                    TerminalEvents::TerminalEvents(e),
-                ))
+                GlobalEvents::UiEvents(UiMessages::TerminalEvents(TerminalEvents::TerminalEvents(
+                    e,
+                )))
             })
         }));
 

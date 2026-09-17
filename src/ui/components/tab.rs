@@ -4,14 +4,13 @@ use iced::{
 };
 
 use crate::{
-    events::{tab::TabEvents, ui::UiMessages},
+    events::{tab::TabEvents, ui::UiMessages, update::GlobalEvents},
     state::GlobalState,
     ui::style::style::tab_button_style,
-    update::GlobalMessagens,
 };
 
 impl GlobalState {
-    pub fn tab_view(&self) -> Element<'static, GlobalMessagens> {
+    pub fn tab_view(&self) -> Element<'static, GlobalEvents> {
         let r = row![]
             .extend(self.ui_state.tabs.iter().map(|tab| {
                 let is_current = self.ui_state.current_file.as_ref() == Some(tab);
@@ -20,12 +19,12 @@ impl GlobalState {
                     column![row![
                         button(text(format!("{}", tab.tab_name)).center().size(16))
                             .style(move |t, s| tab_button_style(t, s, is_current))
-                            .on_press(GlobalMessagens::UiEvents(UiMessages::TabEvents(
+                            .on_press(GlobalEvents::UiEvents(UiMessages::TabEvents(
                                 TabEvents::TabSelected(tab.clone())
                             ))),
                         button(text("X").size(16).center())
                             .style(move |t, s| tab_button_style(t, s, is_current))
-                            .on_press(GlobalMessagens::UiEvents(UiMessages::TabEvents(
+                            .on_press(GlobalEvents::UiEvents(UiMessages::TabEvents(
                                 TabEvents::CloseTab(tab.clone())
                             ))),
                     ],]
